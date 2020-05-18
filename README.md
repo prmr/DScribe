@@ -1,6 +1,17 @@
 # DScribe
 DScribe is a technique to generate both unit tests and documentation from a set of templates and invocations.
 
+## License and Attribution
+
+The content of this repository is licensed unter the terms of the [Apache license, Version 2.0](LICENSE). To indicate attribution, please link to this repository and cite the following technical report:
+
+```
+Mathieu Nassif, Alexa Hernandez, Ashvitha Sridharan, and Martin P. Robillard.
+Generating Unit Tests for Documentation.
+ArXiv preprint XXX, 12 pages.
+18 May 2020.
+```
+
 ## Installing DScribe
 
 **Using Eclipse:** You can import this repository as an Eclipse project, and run it with a recent Java version (>= 11).
