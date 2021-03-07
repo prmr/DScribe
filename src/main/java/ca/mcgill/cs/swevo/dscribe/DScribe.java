@@ -16,7 +16,6 @@
 package ca.mcgill.cs.swevo.dscribe;
 
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine;
-import ca.mcgill.cs.swevo.dscribe.cli.CreateConfig;
 import ca.mcgill.cs.swevo.dscribe.cli.GenerateDocs;
 import ca.mcgill.cs.swevo.dscribe.cli.GenerateTests;
 import ca.mcgill.cs.swevo.dscribe.cli.ParseTests;
@@ -32,7 +31,7 @@ import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Model.CommandSpec;
 @Command(name = "dscribe",
 		mixinStandardHelpOptions = true,
 		synopsisSubcommandLabel = "COMMAND",
-		subcommands = { CreateConfig.class, GenerateTests.class, GenerateDocs.class, ParseTests.class })
+		subcommands = { GenerateTests.class, GenerateDocs.class, ParseTests.class })
 public class DScribe implements Runnable {
 	
 	private Context context = Context.defaultContext();
