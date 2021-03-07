@@ -50,6 +50,12 @@ public class FocalMethod implements Iterable<TemplateInstance>
 			this.parameters = null;
 		}
 	}
+	
+	public FocalMethod(String name)
+	{
+		this.name = name;
+		this.parameters = null; 
+	}
 
 	public void addTest(TemplateInstance test)
 	{
@@ -72,6 +78,7 @@ public class FocalMethod implements Iterable<TemplateInstance>
 		return Optional.ofNullable(parameters);
 	}
 
+	// need to update
 	public boolean validate(List<String> warnings, Class<?> declaringType, TemplateRepository repository)
 	{
 		try

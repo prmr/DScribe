@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.google.gson.annotations.Expose;
 
 import ca.mcgill.cs.swevo.dscribe.template.Placeholder;
@@ -32,22 +33,31 @@ import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
 /**
  * A Template is a commonly seen form of code. It needs a set of params to create meaning.
  */
+
+// rename TemplateData
 public class TemplateInstance
 {
 	private InstanceContext context = null;
 
 	@Expose
-	private String templateName;
+	private final String templateName;
 	@Expose
-	private Map<String, PlaceholderValue> placeholders = new HashMap<>();
+	private final Map<String, PlaceholderValue> placeholders = new HashMap<>();
+	private final NormalAnnotationExpr annExpr;
 
-	public TemplateInstance(String templateName, Map<String, String[]> values)
+	public TemplateInstance(String templateName, Map<String, String[]> values, NormalAnnotationExpr annExpr)
 	{
 		this.templateName = templateName;
+		this.annExpr = annExpr.clone();
 		for (Entry<String, String[]> value : values.entrySet())
 		{
 			placeholders.put(value.getKey(), new PlaceholderValue(value.getValue()));
 		}
+	}
+	
+	public TemplateInstance(String templateName, Map<String, String[]> values)
+	{
+		this(templateName, values, null);
 	}
 
 	public void setContext(InstanceContext context)
@@ -59,7 +69,12 @@ public class TemplateInstance
 	{
 		return templateName;
 	}
-
+	
+	public NormalAnnotationExpr getAnnotationExpr()
+	{
+		return annExpr;
+	}
+	
 	public boolean containsPlaceholder(String placeholder)
 	{
 		return placeholders.containsKey(placeholder);

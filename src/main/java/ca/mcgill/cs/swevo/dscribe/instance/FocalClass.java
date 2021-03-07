@@ -27,6 +27,7 @@ import ca.mcgill.cs.swevo.dscribe.utils.TypeNameResolver;
 /**
  * A FocalClass Holds reference to different units under tests. (usually methods)
  */
+
 public class FocalClass implements Iterable<FocalMethod>
 {
 	@Expose
@@ -85,15 +86,15 @@ public class FocalClass implements Iterable<FocalMethod>
 					+ " in the source code. Please provide valid canonical name.");
 			return false;
 		}
-		for (Iterator<FocalMethod> iter = methods.iterator(); iter.hasNext();)
-		{
-			FocalMethod focus = iter.next();
-			boolean valid = focus.validate(warnings, type, repository);
-			if (!valid)
-			{
-				iter.remove();
-			}
-		}
+//		for (Iterator<FocalMethod> iter = methods.iterator(); iter.hasNext();)
+//		{
+//			FocalMethod focus = iter.next();
+//			boolean valid = focus.validate(warnings, type, repository);
+//			if (!valid)
+//			{
+//				iter.remove();
+//			}
+//		}
 		return true;
 	}
 }

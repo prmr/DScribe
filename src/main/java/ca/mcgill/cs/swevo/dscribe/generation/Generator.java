@@ -15,58 +15,57 @@
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.generation;
 
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ParserConfiguration.LanguageLevel;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalClass;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalMethod;
 import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstances;
-import ca.mcgill.cs.swevo.dscribe.template.Template;
+import ca.mcgill.cs.swevo.dscribe.instance.TestClass;
 import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
 
 public abstract class Generator
 {
-	private TemplateRepository repository;
-	private List<TemplateInstances> invocations;
-
-	public void prepare(Context context)
+	protected TemplateRepository repository;
+	private final JavaParser parser;	
+	protected final TestClass testClass;
+	
+	public Generator(TestClass testClass)
 	{
-		repository = context.templateRepository();
-		invocations = context.templateInstancesPaths().stream().map(TemplateInstances::fromJson)
-				.collect(Collectors.toList());
-		invocations.forEach(i -> i.validate(repository).forEach(System.out::println));
+		this.testClass = testClass;
+		parser = initParser();
+	}
+	
+	public void prepare(Context context) throws ReflectiveOperationException, URISyntaxException
+	{
+		repository = context.templateRepository(); 
+		testClass.produceCompilationUnit(parser);
+		testClass.extractTemplateDataFromAnnotations();
+		testClass.validate(repository).forEach(System.out::println);
 	}
 
 	public final void loadInvocations()
 	{
-		for (TemplateInstances invocationSet : invocations)
-		{
-			for (FocalClass focalClass : invocationSet)
-			{
-				for (FocalMethod focalMethod : focalClass)
-				{
-					for (TemplateInstance instance : focalMethod)
-					{
-						addDefaultPlaceholders(instance, focalClass, focalMethod);
-						Template template = repository.get(instance.getName());
-						addInvocation(instance, template);
-					}
-				}
-			}
-		}
+		addInvocations(testClass);
 	}
-
-	private void addDefaultPlaceholders(TemplateInstance instance, FocalClass focalClass, FocalMethod focalMethod)
+		
+	protected void addDefaultPlaceholders(TemplateInstance instance, FocalClass focalClass, FocalMethod focalMethod)
 	{
 		instance.addPlaceholder("$package$", focalClass.getPackageName());
 		String className = focalClass.getSimpleName();
 		instance.addPlaceholder("$class$", className);
 		String methodName = focalMethod.getName();
+		
 		if (methodName.equals(className))
 		{
 			methodName = "new " + methodName;
@@ -87,9 +86,17 @@ public abstract class Generator
 		}
 	}
 
-	protected abstract void addInvocation(TemplateInstance instance, Template template);
+	private JavaParser initParser()
+	{
+		ParserConfiguration config = new ParserConfiguration();
+		config.setLanguageLevel(LanguageLevel.CURRENT);
+		// TODO detect tab size? still issues
+		config.setTabSize(4);
+		config.setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver(false)));
+		return new JavaParser(config);
+	}
+	
+	protected abstract void addInvocations(TestClass testClass);
 
 	public abstract List<Exception> generate();
-
-	public abstract List<Path> output();
 }
