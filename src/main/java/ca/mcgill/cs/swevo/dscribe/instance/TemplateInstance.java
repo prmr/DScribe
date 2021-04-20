@@ -47,12 +47,11 @@ public class TemplateInstance
 
 	public TemplateInstance(String templateName, Map<String, String[]> values, NormalAnnotationExpr annExpr)
 	{
+		assert templateName != null && annExpr != null;
 		this.templateName = templateName;
 		this.annExpr = annExpr.clone();
 		for (Entry<String, String[]> value : values.entrySet())
-		{
 			placeholders.put(value.getKey(), new PlaceholderValue(value.getValue()));
-		}
 	}
 	
 	public TemplateInstance(String templateName, Map<String, String[]> values)
@@ -62,6 +61,7 @@ public class TemplateInstance
 
 	public void setContext(InstanceContext context)
 	{
+		assert context != null;
 		this.context = context;
 	}
 
@@ -97,30 +97,33 @@ public class TemplateInstance
 			warnings.add("TEMPLATE DOES NOT EXIST:" + templateName + " is not a valid template.");
 			return false;
 		}
-		Template template = repository.get(templateName);
+		List<Template> templates = repository.get(templateName);
 		Set<String> extraPlaceholders = new HashSet<>(placeholders.keySet());
-		for (Placeholder placeholder : template)
+		for (Template template: templates) 
 		{
-			String phName = placeholder.getName();
-			extraPlaceholders.remove(phName);
-			if (!containsPlaceholder(phName))
+			for (Placeholder placeholder : template)
 			{
-				warnings.add("MISSING PLACEHOLDER: Missing value for placeholder " + phName + ".");
-				return false;
+				String phName = placeholder.getName();
+				extraPlaceholders.remove(phName);
+				if (!containsPlaceholder(phName))
+				{
+					warnings.add("MISSING PLACEHOLDER: Missing value for placeholder " + phName + ".");
+					return false;
+				}
+				PlaceholderValue value = getPlaceholderValue(phName);
+				PlaceholderType type = placeholder.getType();
+				if (!type.typeCheck(value, context))
+				{
+					warnings.add("PLACEHOLDER TYPE ERROR: Placeholder value " + value + " failed validation for type "
+							+ type + ".");
+					return false;
+				}
 			}
-			PlaceholderValue value = getPlaceholderValue(phName);
-			PlaceholderType type = placeholder.getType();
-			if (!type.typeCheck(value, context))
+			if (!extraPlaceholders.isEmpty())
 			{
-				warnings.add("PLACEHOLDER TYPE ERROR: Placeholder value " + value + " failed validation for type "
-						+ type + ".");
-				return false;
-			}
-		}
-		if (!extraPlaceholders.isEmpty())
-		{
-			warnings.add("EXTRA PLACEHOLDERS: Unused placeholders " + extraPlaceholders + " for template "
-					+ templateName + ".");
+				warnings.add("EXTRA PLACEHOLDERS: Unused placeholders " + extraPlaceholders + " for template "
+						+ templateName + ".");
+			}	
 		}
 		return true;
 	}

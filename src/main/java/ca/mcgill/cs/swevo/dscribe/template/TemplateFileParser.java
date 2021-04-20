@@ -52,7 +52,6 @@ public class TemplateFileParser extends VoidVisitorAdapter<List<ImportDeclaratio
 	{
 		add = addMethod;
 	}
-
 	@Override
 	public void visit(PackageDeclaration n, List<ImportDeclaration> arg)
 	{
@@ -72,7 +71,7 @@ public class TemplateFileParser extends VoidVisitorAdapter<List<ImportDeclaratio
 	{
 		if (className != null)
 		{
-			System.out.println("TEMPLATE FILE ERROR: Template file cannot contain nested classes or interfacse.");
+			System.out.println("TEMPLATE FILE ERROR: Template file cannot contain nested classes or interfaces.");
 			return;
 		}
 		className = n.getNameAsString();

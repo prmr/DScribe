@@ -15,6 +15,8 @@
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.template;
 
+import java.util.List;
+
 public interface TemplateRepository extends Iterable<String>
 {
 	/**
@@ -34,5 +36,5 @@ public interface TemplateRepository extends Iterable<String>
 	 *            Name of template method.
 	 * @return MethodDeclaration clone of the template method.
 	 */
-	public Template get(String templateName);
+	public List<Template> get(String templateName);
 }

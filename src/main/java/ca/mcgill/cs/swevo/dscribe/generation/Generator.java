@@ -16,10 +16,8 @@
 package ca.mcgill.cs.swevo.dscribe.generation;
 
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParserConfiguration;
@@ -30,33 +28,39 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalClass;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalMethod;
+import ca.mcgill.cs.swevo.dscribe.instance.FocalTestPair;
 import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
-import ca.mcgill.cs.swevo.dscribe.instance.TestClass;
 import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
 
 public abstract class Generator
 {
 	protected TemplateRepository repository;
-	private final JavaParser parser;	
-	protected final TestClass testClass;
+	protected final JavaParser parser;	
+	protected final List<FocalTestPair> focalTestPairs; 
 	
-	public Generator(TestClass testClass)
+	public Generator(List<FocalTestPair> focalTestPairs)
 	{
-		this.testClass = testClass;
+		assert focalTestPairs != null;
+		this.focalTestPairs = new ArrayList<>(focalTestPairs);
 		parser = initParser();
 	}
 	
-	public void prepare(Context context) throws ReflectiveOperationException, URISyntaxException
+	public void prepare(Context context, boolean docs) throws ReflectiveOperationException, URISyntaxException
 	{
 		repository = context.templateRepository(); 
-		testClass.produceCompilationUnit(parser);
-		testClass.extractTemplateDataFromAnnotations();
-		testClass.validate(repository).forEach(System.out::println);
+		for (FocalTestPair focalTestPair : focalTestPairs)
+		{
+			focalTestPair.parseCompilationUnit(parser); // remove ones w errors
+			focalTestPair.extractTemplateDataFromAnnotations(docs);
+			List<String> warnings = new ArrayList<String>();
+			boolean isValid = focalTestPair.validate(warnings, repository); // remove ones w errors
+			warnings.forEach(System.out::println);
+		}
 	}
 
 	public final void loadInvocations()
 	{
-		addInvocations(testClass);
+		focalTestPairs.forEach(this::addInvocations);
 	}
 		
 	protected void addDefaultPlaceholders(TemplateInstance instance, FocalClass focalClass, FocalMethod focalMethod)
@@ -71,19 +75,15 @@ public abstract class Generator
 			methodName = "new " + methodName;
 		}
 		instance.addPlaceholder("$method$", methodName);
-		Optional<List<String>> parameters = focalMethod.getParameters();
-		if (parameters.isPresent())
+		List<String> paramNames = new ArrayList<>();
+		int i = 0;
+		for (String paramType : focalMethod.getParameters())
 		{
-			List<String> paramNames = new ArrayList<>();
-			int i = 0;
-			for (String paramType : parameters.get())
-			{
-				instance.addPlaceholder("$paramtype" + i + "$", paramType);
-				paramNames.add(paramType);
-				i++;
-			}
-			instance.addPlaceholder("$paramtypes$", paramNames.toArray(String[]::new));
+			instance.addPlaceholder("$paramtype" + i + "$", paramType);
+			paramNames.add(paramType);
+			i++;
 		}
+		instance.addPlaceholder("$paramtypes$", paramNames.toArray(String[]::new));
 	}
 
 	private JavaParser initParser()
@@ -96,7 +96,12 @@ public abstract class Generator
 		return new JavaParser(config);
 	}
 	
-	protected abstract void addInvocations(TestClass testClass);
-
-	public abstract List<Exception> generate();
+	public List<Exception> generate()
+	{
+		List<Exception> exceptions = new ArrayList<>();
+		focalTestPairs.forEach(ftp -> ftp.writeToFile(exceptions));
+		return exceptions;
+	}
+	
+	protected abstract void addInvocations(FocalTestPair focalTestPair);
 }

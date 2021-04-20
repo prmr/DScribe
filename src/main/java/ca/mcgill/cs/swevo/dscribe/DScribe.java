@@ -18,7 +18,6 @@ package ca.mcgill.cs.swevo.dscribe;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine;
 import ca.mcgill.cs.swevo.dscribe.cli.GenerateDocs;
 import ca.mcgill.cs.swevo.dscribe.cli.GenerateTests;
-import ca.mcgill.cs.swevo.dscribe.cli.ParseTests;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Command;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.ParameterException;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Spec;
@@ -31,7 +30,7 @@ import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Model.CommandSpec;
 @Command(name = "dscribe",
 		mixinStandardHelpOptions = true,
 		synopsisSubcommandLabel = "COMMAND",
-		subcommands = { GenerateTests.class, GenerateDocs.class, ParseTests.class })
+		subcommands = { GenerateTests.class, GenerateDocs.class })
 public class DScribe implements Runnable {
 	
 	private Context context = Context.defaultContext();
@@ -46,7 +45,7 @@ public class DScribe implements Runnable {
 	@Override
 	public void run() {
 		throw new ParameterException(spec.commandLine(),
-				"Please specify a subcommand such as createConfig or generateTests.");
+				"Please specify a subcommand such as generateTests or generateDocs.");
 	}
 	
 	public Context getContext() {

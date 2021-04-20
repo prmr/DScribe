@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.github.javaparser.ast.CompilationUnit;
@@ -35,7 +36,7 @@ import ca.mcgill.cs.swevo.dscribe.utils.exceptions.RepositoryException.Repositor
 public class InMemoryTemplateRepository implements TemplateRepository
 {
 	// Data structure for the template methods
-	private final Map<String, Template> templateMethods = new HashMap<>();
+	private final Map<String, List<Template>> templateMethods = new HashMap<>();
 
 	public InMemoryTemplateRepository(String sourceFolder)
 	{
@@ -63,11 +64,21 @@ public class InMemoryTemplateRepository implements TemplateRepository
 	 */
 	private void addTemplate(Template template)
 	{
-		templateMethods.put(template.getName(), template);
+		if (templateMethods.containsKey(template.getName()))
+		{
+			List<Template> newList = templateMethods.get(template.getName());
+			newList.add(template);
+			templateMethods.put(template.getName(), newList);
+		}
+		else  {
+			List<Template> newList = new ArrayList<>();
+			newList.add(template);
+			templateMethods.put(template.getName(), newList);
+		}
 	}
 
 	@Override
-	public Template get(String name)
+	public List<Template> get(String name)
 	{
 		return templateMethods.get(name);
 	}

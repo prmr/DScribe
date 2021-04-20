@@ -15,104 +15,91 @@
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.generation.test;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 
+import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.generation.Generator;
+import ca.mcgill.cs.swevo.dscribe.instance.FocalClass;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalMethod;
+import ca.mcgill.cs.swevo.dscribe.instance.FocalTestPair;
 import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
 import ca.mcgill.cs.swevo.dscribe.instance.TestClass;
 import ca.mcgill.cs.swevo.dscribe.template.Template;
 
 /**
- * Generates the final compilation units in order to output tests. The Test Generator performs its task without state,
- * i.e. like a function Given the correct inputs it will output the correct outputs. This idea of immutability is to
- * ensure: 1. Centralizes the responsibility of the object 2. Focus on the core function / processing 3. In turn,
- * enables decoupling the functionality, the class can be used whenever/wherever easily
+ * Generates the final compilation units in order to output tests. The Test
+ * Generator performs its task without state, i.e. like a function Given the
+ * correct inputs it will output the correct outputs. This idea of immutability
+ * is to ensure: 1. Centralizes the responsibility of the object 2. Focus on the
+ * core function / processing 3. In turn, enables decoupling the functionality,
+ * the class can be used whenever/wherever easily
  */
-public class TestGenerator extends Generator
+public class TestGenerator extends Generator 
 {
-	public TestGenerator(TestClass testClass)
+	public TestGenerator(List<FocalTestPair> focalTestPairs) 
 	{
-		super(testClass);
+		super(focalTestPairs);
 	}
 
-	protected void addInvocations(TestClass testClass)
+	public void prepare(Context context) throws ReflectiveOperationException, URISyntaxException
 	{
-		for (FocalMethod focalMethod : testClass.focalClass())
-		{
-			for (TemplateInstance instance : focalMethod)
-			{
-				addDefaultPlaceholders(instance, testClass.focalClass(), focalMethod);
-				Template template = super.repository.get(instance.getName());
-				addInvocation(testClass, instance, template);
-			}		
-		}
+		super.prepare(context, false);
 	}
 	
-	private void addInvocation(TestClass testClass, TemplateInstance instance, Template template)
+	protected void addInvocations(FocalTestPair focalTestPair) 
+	{
+		FocalClass focalClass = focalTestPair.focalClass();
+		for (FocalMethod focalMethod : focalClass) {
+			for (TemplateInstance instance : focalMethod) {
+				addDefaultPlaceholders(instance, focalClass, focalMethod);
+				List<Template> templates = repository.get(instance.getName());
+				for (Template template : templates) {
+					addInvocation(focalTestPair.testClass(), focalClass.getMethodDeclaration(focalMethod), instance,
+							template);
+				}
+			}
+		}
+	}
+
+	private void addInvocation(TestClass testClass, MethodDeclaration methodDecl, TemplateInstance instance,
+			Template template) 
 	{
 		CompilationUnit cu = testClass.compilationUnit();
-		ClassOrInterfaceDeclaration type = cu.getType(0).asClassOrInterfaceDeclaration();
+		TypeDeclaration<?> type = cu.getType(0);
 		Optional<UnitTestFactory> factory = template.getTestFactory();
-		if (factory.isPresent())
+		if (factory.isPresent()) 
 		{
 			MethodDeclaration method = factory.get().create(instance);
 			type.addMember(method);
 			addImports(cu, template);
-			moveAnnotation(type, method, instance.getAnnotationExpr());
+			moveAnnotation(methodDecl, method, instance.getAnnotationExpr());
 		}
 	}
 
-	private void moveAnnotation(ClassOrInterfaceDeclaration type, MethodDeclaration method, NormalAnnotationExpr annExpr) 
+	private void moveAnnotation(MethodDeclaration methodDecl, MethodDeclaration method, NormalAnnotationExpr annExpr) 
 	{
-		List<AnnotationExpr> annotations = type.getAnnotations();
+		List<AnnotationExpr> annotations = methodDecl.getAnnotations();
 		annotations.remove(annExpr);
-		type.setAnnotations(new NodeList<AnnotationExpr>(annotations));
-		method.addAnnotation(annExpr);		
+		methodDecl.setAnnotations(new NodeList<AnnotationExpr>(annotations));
+		annExpr.addPair("uut", "\"" + methodDecl.getSignature().asString() + "\"");
+		method.addAnnotation(annExpr);
 	}
 
-	private void addImports(CompilationUnit cu, Template template)
+	private void addImports(CompilationUnit cu, Template template) 
 	{
 		List<ImportDeclaration> newImports = new ArrayList<>(template.getNecessaryImports());
 		newImports.removeAll(cu.getImports());
-		for (ImportDeclaration newImport : newImports)
-		{
-			cu.addImport(newImport);
-		}
-	}
-
-	@Override
-	public List<Exception> generate()
-	{
-		List<Exception> exceptions = new ArrayList<>();
-		CompilationUnit finalTestCu = testClass.compilationUnit();
-		String className = finalTestCu.getType(0).getNameAsString();
-		try (BufferedWriter fileWriter = Files.newBufferedWriter(testClass.path(), UTF_8))
-		{
-			fileWriter.write(finalTestCu.toString());
-			System.out.println("Successfully generated tests for " + className + ".java");
-		}
-		catch (IOException exception)
-		{
-			exceptions.add(exception);
-		}
-		return exceptions;
+		newImports.forEach(i -> cu.addImport(i));		
 	}
 }

@@ -15,10 +15,13 @@
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe;
 
+
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,31 +50,21 @@ public class Context
 
 	public List<Path> srcPaths()
 	{
-		return List.of(Path.of("src", "main", "java"));
+		return List.of(Path.of(Paths.get("..").toAbsolutePath().normalize().toString(),"JetUML", "src", "ca", "mcgill", "cs", "jetuml", "geom"), Path.of(Paths.get("..").toAbsolutePath().normalize().toString(),"JetUML", "src", "ca", "mcgill", "cs", "jetuml", "diagram"));
 	}
-
-	public Path testsOutputPath()
+	
+	private void listJavaFiles(File dirFile, List<Path> javaFiles)
 	{
-		return Path.of("output/");
-	}
-
-	public Path formatTemplateInstancePath(String className)
-	{
-		return Path.of("configs", className + ".config.json");
-	}
-
-	public List<Path> templateInstancesPaths()
-	{
-		try (Stream<Path> allPaths = Files.list(Path.of("configs")))
+		File[] files = dirFile.listFiles();
+		if (files != null)
 		{
-			List<Path> configPaths = allPaths.filter(f -> f.toString().endsWith(".config.json"))
-					.collect(Collectors.toList());
-			allPaths.close();
-			return configPaths;
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
+			for (File file : files)
+			{
+				if (file.isFile() && file.getName().endsWith(".java"))
+					javaFiles.add(file.toPath());
+				else if (file.isDirectory())
+					listJavaFiles(file, javaFiles);
+			}	
 		}
 	}
 

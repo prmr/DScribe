@@ -19,33 +19,29 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.gson.annotations.Expose;
 
 import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
-import ca.mcgill.cs.swevo.dscribe.utils.TypeNameResolver;
 
 /**
  * A FocalClass Holds reference to different units under tests. (usually methods)
  */
 
-public class FocalClass implements Iterable<FocalMethod>
+public class FocalClass extends AbstractDScribeClass implements Iterable<FocalMethod>
 {
-	@Expose
-	private String fullname;
 	@Expose
 	private List<FocalMethod> methods = new ArrayList<>();
 
-	private String simpleName = null;
-	private String packageName = null;
-
-	public FocalClass(String name)
+	public FocalClass(Class<?> focalClass)
 	{
-		fullname = name;
+		super(focalClass);
 	}
-
+	
 	public String getName()
 	{
-		return fullname;
+		return cls.getCanonicalName();
 	}
 
 	public void addFocalMethod(FocalMethod focalMethod)
@@ -55,14 +51,24 @@ public class FocalClass implements Iterable<FocalMethod>
 
 	public String getSimpleName()
 	{
-		assert simpleName != null;
-		return simpleName;
+		return cls.getSimpleName();
 	}
 
 	public String getPackageName()
 	{
-		assert packageName != null;
-		return packageName;
+		return cls.getPackageName();
+	}
+	
+	public List<FocalMethod> getMethods()
+	{
+		return new ArrayList<>(methods);
+	}
+	
+	public MethodDeclaration getMethodDeclaration(FocalMethod focalMethod)
+	{
+		TypeDeclaration<?> classDecl = cu.getType(0); 
+		List<MethodDeclaration> methodDecl = classDecl.getMethodsBySignature(focalMethod.getName(), focalMethod.getParameters().toArray(String[]::new));
+		return methodDecl.get(0);
 	}
 
 	@Override
@@ -71,30 +77,25 @@ public class FocalClass implements Iterable<FocalMethod>
 		return methods.iterator();
 	}
 
+	@Override
 	public boolean validate(List<String> warnings, TemplateRepository repository)
 	{
-		Class<?> type;
-		try
+		for (Iterator<FocalMethod> iter = methods.iterator(); iter.hasNext();)
 		{
-			type = TypeNameResolver.resolve(fullname);
-			simpleName = type.getSimpleName();
-			packageName = type.getPackageName();
+			FocalMethod focus = iter.next();
+			boolean valid = focus.validate(warnings, cls, repository);
+			if (!valid)
+			{
+				iter.remove();
+			}
 		}
-		catch (ClassNotFoundException e)
-		{
-			warnings.add("CLASS DOES NOT EXIST: Could find java class " + fullname
-					+ " in the source code. Please provide valid canonical name.");
-			return false;
-		}
-//		for (Iterator<FocalMethod> iter = methods.iterator(); iter.hasNext();)
-//		{
-//			FocalMethod focus = iter.next();
-//			boolean valid = focus.validate(warnings, type, repository);
-//			if (!valid)
-//			{
-//				iter.remove();
-//			}
-//		}
 		return true;
+	}
+
+	// TODO: get from context
+	@Override
+	protected String targetFolderName() 
+	{
+		return "src"; 
 	}
 }

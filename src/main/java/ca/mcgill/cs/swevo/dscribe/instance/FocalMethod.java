@@ -19,7 +19,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import com.google.gson.annotations.Expose;
 
@@ -32,33 +31,25 @@ import ca.mcgill.cs.swevo.dscribe.utils.TypeNameResolver;
 public class FocalMethod implements Iterable<TemplateInstance>
 {
 	@Expose
-	private String name;
+	private final String name;
 	@Expose
-	private List<String> parameters;
+	private final List<String> parameters;
 	@Expose
 	public List<TemplateInstance> tests = new ArrayList<>();
 
 	public FocalMethod(String name, List<String> parameters)
 	{
+		assert name != null; 
 		this.name = name;
 		if (parameters != null)
-		{
 			this.parameters = List.copyOf(parameters);
-		}
 		else
-		{
-			this.parameters = null;
-		}
+			this.parameters = new ArrayList<String>();
 	}
 	
-	public FocalMethod(String name)
-	{
-		this.name = name;
-		this.parameters = null; 
-	}
-
 	public void addTest(TemplateInstance test)
 	{
+		assert test != null;
 		tests.add(test);
 	}
 
@@ -73,9 +64,14 @@ public class FocalMethod implements Iterable<TemplateInstance>
 		return name;
 	}
 
-	public Optional<List<String>> getParameters()
+	public List<String> getParameters()
 	{
-		return Optional.ofNullable(parameters);
+		return new ArrayList<>(parameters);
+	}
+	
+	public String getSignature()
+	{
+		return name + "(" + String.join(",", parameters) + ")";
 	}
 
 	// need to update
@@ -102,9 +98,7 @@ public class FocalMethod implements Iterable<TemplateInstance>
 			test.setContext(context);
 			boolean valid = test.validate(warnings, repository);
 			if (!valid)
-			{
 				iter.remove();
-			}
 		}
 		return true;
 	}
@@ -117,18 +111,14 @@ public class FocalMethod implements Iterable<TemplateInstance>
 			if (isConstructor)
 			{
 				if (declaringType.getDeclaredConstructors().length == 0)
-				{
 					throw new NoSuchMethodException();
-				}
 			}
 			else
 			{
 				for (Method method : declaringType.getDeclaredMethods())
 				{
 					if (method.getName().equals(name))
-					{
 						return;
-					}
 				}
 				throw new NoSuchMethodException();
 			}
@@ -137,17 +127,11 @@ public class FocalMethod implements Iterable<TemplateInstance>
 		{
 			Class<?>[] parameterTypes = new Class<?>[parameters.size()];
 			for (int i = 0; i < parameterTypes.length; i++)
-			{
 				parameterTypes[i] = TypeNameResolver.resolve(parameters.get(i));
-			}
 			if (isConstructor)
-			{
 				declaringType.getDeclaredConstructor(parameterTypes);
-			}
 			else
-			{
 				declaringType.getDeclaredMethod(name, parameterTypes);
-			}
 		}
 	}
 }
