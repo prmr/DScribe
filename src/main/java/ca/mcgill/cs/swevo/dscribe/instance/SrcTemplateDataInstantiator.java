@@ -10,37 +10,45 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
+import ca.mcgill.cs.swevo.dscribe.Context;
 
-public class SrcTemplateDataInstantiator extends VoidVisitorAdapter<FocalClass>
-{
-	private static final TemplateDataCollector TEMPLATE_DATA_COLLECTOR = new TemplateDataCollector();
-	
-	@Override
-	public void visit(MethodDeclaration md, FocalClass focalClass) 
-	{
-		List<String> params = new ArrayList<String>();
-		md.getParameters().forEach(p -> params.add(p.getTypeAsString()));
-		FocalMethod focalMethod = new FocalMethod(md.getNameAsString(), params);
-		md.getAnnotations().forEach(a -> a.accept(TEMPLATE_DATA_COLLECTOR, focalMethod));
-		focalClass.addFocalMethod(focalMethod);
-	}
-	
-	private static class TemplateDataCollector extends VoidVisitorAdapter<FocalMethod>
-	{
-		@Override
-		public void visit(NormalAnnotationExpr annExpr, FocalMethod focalMethod)
-		{
-			if (ExtractTemplateData.isDScribeAnnotation(annExpr))
-	        {
-	        	String templateName = annExpr.getNameAsString();
-	        	Map<String, String[]> placeholders = new HashMap<String, String[]>(); 
-	        	
-	        	annExpr.getChildNodes().forEach(n -> n.accept(ExtractTemplateData.PARAM_COLLECTOR, placeholders));  
-	            TemplateInstance instance = new TemplateInstance(templateName, placeholders, annExpr);
-	            focalMethod.addTest(instance);
-	        }
-		}
-	}
-	
-	
+
+public class SrcTemplateDataInstantiator extends VoidVisitorAdapter<FocalClass> {
+  private static final TemplateDataCollector TEMPLATE_DATA_COLLECTOR = new TemplateDataCollector();
+
+  /**
+   * 
+   */
+  @Override
+  public void visit(MethodDeclaration methodDecl, FocalClass focalClass) {
+    List<String> params = new ArrayList<>();
+    methodDecl.getParameters().forEach(p -> params.add(p.getTypeAsString()));
+    var focalMethod = new FocalMethod(methodDecl.getNameAsString(), params);
+    methodDecl.getAnnotations().forEach(a -> a.accept(TEMPLATE_DATA_COLLECTOR, focalMethod));
+    focalClass.addFocalMethod(focalMethod);
+  }
+
+  private static class TemplateDataCollector extends VoidVisitorAdapter<FocalMethod> {
+    /**
+     * Extract the template instance from the given annotation invocation and add it to the
+     * FocalMethod
+     */
+    @Override
+    public void visit(NormalAnnotationExpr annExpr, FocalMethod focalMethod) {
+      if (ExtractTemplateData.isDScribeAnnotation(annExpr)) {
+        var templateName = annExpr.getNameAsString();
+        Map<String, String[]> placeholders = new HashMap<>();
+
+        annExpr.getChildNodes()
+            .forEach(n -> n.accept(ExtractTemplateData.PARAM_COLLECTOR, placeholders));
+        var instance = new TemplateInstance(templateName, placeholders, annExpr);
+        boolean isValidInstance = instance.validate(Context.instance().templateRepository());
+        if (isValidInstance) {
+          focalMethod.addTest(instance);
+        }
+      }
+    }
+  }
+
+
 }

@@ -6,11 +6,8 @@ import org.junit.jupiter.api.Nested;
 import ca.mcgill.cs.swevo.dscribe.annotation.DScribeAnnotations.*;
 import org.junit.jupiter.api.Test;
 
-public class Test$class$ 
+public class Template 
 {	
-	/** 
-	 * IF the input is $params$ THEN $method$ throws an $exType$
-	 */
 	@Template("AssertThrows")
 	@Types($state$=EXPR, $factory$=EXPR, $exType$=EXCEPTION, $params$=EXPR_LIST)
 	@Test
@@ -18,28 +15,28 @@ public class Test$class$
 	{
 		assertThrows($exType$.class, () -> $factory$.$method$($params$)); 
 	}
-	
-	
-	@Template("LogTrace")
-	@Types($state$=EXPR, $pattern$=EXPR, $arg$=EXPR, $oracle$=EXPR)
-	@Test
-	public void testTrace$state$()
-	{
-		LogCapture capture = new LogCapture(TRACE);
-	    logger.setLevel(TRACE);
-	    $class$.trace(logger, $pattern$, $arg$);
-	    assertEquals($oracle$, capture.getMessage());	
-	}
-	
-	/**
-	 *	Test doc frag 
-	 */
-	@Template("AssertBool")
-    @Types($state$=EXPR, $bool$=EXPR, $factory$=EXPR, $params$=EXPR_LIST)
-    @Test
-    public void test_$method$_$state$() {
-        assert$bool$($factory$.$method$($params$));
-    }
+//	
+//	
+//	@Template("LogTrace")
+//	@Types($state$=EXPR, $pattern$=EXPR, $arg$=EXPR, $oracle$=EXPR)
+//	@Test
+//	public void testTrace$state$()
+//	{
+//		LogCapture capture = new LogCapture(TRACE);
+//	    logger.setLevel(TRACE);
+//	    $class$.trace(logger, $pattern$, $arg$);
+//	    assertEquals($oracle$, capture.getMessage());	
+//	}
+//	
+//	/**
+//	 *	Test doc frag 
+//	 */
+//	@Template("AssertBool")
+//    @Types($state$=EXPR, $bool$=EXPR, $factory$=EXPR, $params$=EXPR_LIST)
+//    @Test
+//    public void test_$method$_$state$() {
+//        assert$bool$($factory$.$method$($params$));
+//    }
 	
 //	@Template(“EqualsContract”)
 //	@Types($factory1$=EXPR, $factory2$=EXPR, $factory3$=EXPR)

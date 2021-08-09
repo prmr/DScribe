@@ -11,97 +11,83 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 
-import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
+import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.GenerationException;
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.GenerationException.GenerationError;
 
-public abstract class AbstractDScribeClass implements DScribeClass
-{
-	protected Class<?> cls;
-	protected CompilationUnit cu;
-	
-	public AbstractDScribeClass(Class<?> cls)
-	{
-		assert cls != null;
-		this.cls = cls;
-	}
+public abstract class AbstractDScribeClass implements DScribeClass {
+  protected Class<?> cls;
+  protected CompilationUnit cu;
 
-	public CompilationUnit compilationUnit() 
-	{
-		return cu;
-	}
-	
-	@Override
-	public void parseCompilationUnit(JavaParser parser)
-	{
-		try
-		{
-			ParseResult<CompilationUnit> parseResult = parser.parse(path());
-			if (!parseResult.isSuccessful())
-			{
-				throw new GenerationException(GenerationError.INVALID_SOURCE_FILE);
-			}
-			CompilationUnit compilationUnit = parseResult.getResult().get();
-			LexicalPreservingPrinter.setup(compilationUnit);
-			cu = compilationUnit;
-		}
-		catch (IOException e)
-		{
-			throw new GenerationException(GenerationError.IO_ERROR, e);
-		}
-	}
-	
-	public Path path() 
-	{
-		URL binUrl = getClass().getClassLoader().getResource(resourceName());
-		Path binPath = Paths.get(URI.create(binUrl.toString()));
-		Path classPath = classPathFromBinPath(binPath);
-		return classPath;
-	}
-	
-	private String resourceName()
-	{
-		String className = cls.getName();
-		return className.replaceAll(Pattern.quote("."),"/") + ".class";
-	}
-	
-	private final Path classPathFromBinPath(Path binPath)
-	{
-		// define src, bin, test folders in context class
-		String binFolder = Pattern.quote(File.separator + "bin" + File.separator);
-		String srcFolder = Matcher.quoteReplacement(File.separator + targetFolderName() + File.separator);
-		String binExt = Pattern.quote(".class");
-		String srcExt = Matcher.quoteReplacement(".java");
-		
-		String binLocation = binPath.toString();
-		String srcLocation = binLocation.replaceFirst(binFolder, srcFolder).replaceFirst(binExt, srcExt);
-		return Paths.get(srcLocation);
-	}
-	
-	@Override
-	public boolean writeToFile(List<Exception> exceptions)
-	{
-		try (BufferedWriter fileWriter = Files.newBufferedWriter(path(), UTF_8))
-		{
-			fileWriter.write(cu.toString());
-		}
-		catch (IOException exception)
-		{
-			exceptions.add(exception);
-			return false;
-		}
-		return true;
-	}
-		
-	abstract protected String targetFolderName();
+  protected AbstractDScribeClass(Class<?> cls) {
+    assert cls != null;
+    this.cls = cls;
+  }
 
-	abstract public boolean validate(List<String> warnings, TemplateRepository repository);
+  public CompilationUnit compilationUnit() {
+    return cu;
+  }
+
+  @Override
+  public void parseCompilationUnit(JavaParser parser) {
+    try {
+      ParseResult<CompilationUnit> parseResult = parser.parse(path());
+      if (!parseResult.isSuccessful()) {
+        throw new GenerationException(GenerationError.INVALID_SOURCE_FILE);
+      }
+      Optional<CompilationUnit> result = parseResult.getResult();
+      if (result.isPresent()) {
+        cu = result.get();
+      }
+    } catch (IOException e) {
+      throw new GenerationException(GenerationError.IO_ERROR, e);
+    }
+  }
+
+  public Path path() {
+    ClassLoader classLoader = Context.instance().classLoader();
+    URL binUrl = classLoader.getResource(resourceName());
+    Path binPath = Paths.get(URI.create(binUrl.toString()));
+    return classPathFromBinPath(binPath);
+  }
+
+  private String resourceName() {
+    String className = cls.getName();
+    return className.replaceAll(Pattern.quote("."), "/") + ".class";
+  }
+
+  private final Path classPathFromBinPath(Path binPath) {
+    // TO DO : define src, test, bin in context
+    String binFolder = Pattern.quote(File.separator + "bin" + File.separator);
+    String srcFolder =
+        Matcher.quoteReplacement(File.separator + targetFolderName() + File.separator);
+    String binExt = Pattern.quote(".class");
+    String srcExt = Matcher.quoteReplacement(".java");
+
+    String binLocation = binPath.toString();
+    String srcLocation =
+        binLocation.replaceFirst(binFolder, srcFolder).replaceFirst(binExt, srcExt);
+    return Paths.get(srcLocation);
+  }
+
+  @Override
+  public boolean writeToFile(List<Exception> exceptions) {
+    try (BufferedWriter fileWriter = Files.newBufferedWriter(path(), UTF_8)) {
+      fileWriter.write(cu.toString());
+    } catch (IOException exception) {
+      exceptions.add(exception);
+      return false;
+    }
+    return true;
+  }
+
+  protected abstract String targetFolderName();
 }
