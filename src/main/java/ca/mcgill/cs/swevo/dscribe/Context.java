@@ -27,11 +27,17 @@ import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
  *
  */
 public class Context {
+  public enum TestClassNameConvention {
+    POSTFIX, PREFIX
+  };
+
   private static final Context INSTANCE = new Context();
   private static final String ROOT = Paths.get("..").toAbsolutePath().normalize().toString();
   private String templateRepoPath = Path.of("templates").toString(); // default location of
                                                                      // templates
   private ClassLoader classLoader = Context.class.getClassLoader(); // default class loader
+
+  private TestClassNameConvention testClassNameConvention = TestClassNameConvention.POSTFIX;
 
   private Context() {}
 
@@ -61,6 +67,10 @@ public class Context {
   public void setClassLoader(ClassLoader classLoader) {
     assert classLoader != null;
     this.classLoader = classLoader;
+  }
+
+  public TestClassNameConvention testClassNameConvention() {
+    return testClassNameConvention;
   }
 
   public TemplateRepository templateRepository() {
