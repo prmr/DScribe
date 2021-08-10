@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ca.mcgill.cs.swevo.dscribe.instance.PlaceholderValue;
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
 
 public class DocumentationFactory {
 
@@ -26,18 +26,18 @@ public class DocumentationFactory {
   private static final Pattern IFTHEN_PATTERN = Pattern.compile("IF:\\s(.*)\\sTHEN:\\s(.*)");
   private static final Pattern THREEPART_PATTERN = Pattern.compile("(\\[[^\\[\\]]*\\]\\s*){3}");
 
-  private final Function<TemplateInstance, InfoFragment> factory;
+  private final Function<TemplateInvocation, InfoFragment> factory;
 
   public DocumentationFactory(String format) {
     factory = fragmentFactory(format.trim());
   }
 
-  private Function<TemplateInstance, InfoFragment> fragmentFactory(String format) {
+  private Function<TemplateInvocation, InfoFragment> fragmentFactory(String format) {
     Matcher matcher = IFTHEN_PATTERN.matcher(format);
     if (matcher.matches()) {
-      Function<TemplateInstance, Statement> ifFactory =
+      Function<TemplateInvocation, Statement> ifFactory =
           statementFactory(matcher.group(1).trim(), true);
-      Function<TemplateInstance, Statement> thenFactory =
+      Function<TemplateInvocation, Statement> thenFactory =
           statementFactory(matcher.group(2).trim(), false);
       return instance -> new PrePostInfoFragment(ifFactory.apply(instance),
           thenFactory.apply(instance));
@@ -46,7 +46,7 @@ public class DocumentationFactory {
     }
   }
 
-  private Function<TemplateInstance, Statement> statementFactory(String format,
+  private Function<TemplateInvocation, Statement> statementFactory(String format,
       boolean isCondition) {
     if (THREEPART_PATTERN.matcher(format).matches()) {
       String[] split = format.substring(1, format.length() - 1).split("\\]\\[", -1);
@@ -59,7 +59,7 @@ public class DocumentationFactory {
     }
   }
 
-  private String replacePlaceholders(String baseString, TemplateInstance instance) {
+  private String replacePlaceholders(String baseString, TemplateInvocation instance) {
     StringBuilder builder = new StringBuilder();
     Matcher matcher = PLACEHOLDER_PATTERN.matcher(baseString);
     while (matcher.find()) {
@@ -81,7 +81,7 @@ public class DocumentationFactory {
     return builder.toString();
   }
 
-  public InfoFragment create(TemplateInstance instance) {
+  public InfoFragment create(TemplateInvocation instance) {
     return factory.apply(instance);
   }
 }

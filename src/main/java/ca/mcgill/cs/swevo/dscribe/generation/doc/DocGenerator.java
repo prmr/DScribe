@@ -20,17 +20,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
-
 import ca.mcgill.cs.swevo.dscribe.generation.Generator;
-import ca.mcgill.cs.swevo.dscribe.instance.FocalClass;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalMethod;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalTestPair;
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
 import ca.mcgill.cs.swevo.dscribe.template.Template;
 
 public class DocGenerator extends Generator {
@@ -46,8 +43,8 @@ public class DocGenerator extends Generator {
   }
 
   @Override
-  protected void extractTemplateDataFromAnnotations(FocalTestPair focalTestPair) {
-    focalTestPair.extractTemplateDataFromAnnotations(true);
+  protected void extractTemplateInvocations(FocalTestPair focalTestPair) {
+    focalTestPair.extractTemplateInvocations(true);
   }
 
   @Override
@@ -55,9 +52,9 @@ public class DocGenerator extends Generator {
     var focalClass = focalTestPair.focalClass();
     for (FocalMethod focalMethod : focalClass) {
       List<InfoFragment> fragments = new ArrayList<>();
-      for (TemplateInstance instance : focalMethod) {
+      for (TemplateInvocation instance : focalMethod) {
         addDefaultPlaceholders(instance, focalClass, focalMethod);
-        List<Template> templates = repository.get(instance.getName());
+        List<Template> templates = templateRepo.get(instance.getName());
         for (Template template : templates) {
           Optional<DocumentationFactory> factory = template.getDocFactory();
           if (factory.isPresent()) {

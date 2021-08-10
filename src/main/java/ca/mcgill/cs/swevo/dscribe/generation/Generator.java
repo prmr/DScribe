@@ -16,22 +16,20 @@ package ca.mcgill.cs.swevo.dscribe.generation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-
 import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalClass;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalMethod;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalTestPair;
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
 import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
 
 public abstract class Generator {
-  protected TemplateRepository repository;
+  protected TemplateRepository templateRepo;
   protected final JavaParser parser;
   protected final List<FocalTestPair> focalTestPairs;
 
@@ -42,11 +40,11 @@ public abstract class Generator {
   }
 
   public void prepare(Context context) {
-    repository = context.templateRepository();
+    templateRepo = context.templateRepository();
     for (Iterator<FocalTestPair> iter = focalTestPairs.iterator(); iter.hasNext();) {
       var focalTestPair = iter.next();
       focalTestPair.parseCompilationUnit(parser);
-      extractTemplateDataFromAnnotations(focalTestPair);
+      extractTemplateInvocations(focalTestPair);
     }
   }
 
@@ -54,7 +52,7 @@ public abstract class Generator {
     focalTestPairs.forEach(this::addInvocations);
   }
 
-  protected void addDefaultPlaceholders(TemplateInstance instance, FocalClass focalClass,
+  protected void addDefaultPlaceholders(TemplateInvocation instance, FocalClass focalClass,
       FocalMethod focalMethod) {
     instance.addPlaceholder("$package$", focalClass.getPackageName());
     String className = focalClass.getSimpleName();
@@ -89,8 +87,8 @@ public abstract class Generator {
     return exceptions;
   }
 
-  protected void extractTemplateDataFromAnnotations(FocalTestPair focalTestPair) {
-    focalTestPair.extractTemplateDataFromAnnotations(false);
+  protected void extractTemplateInvocations(FocalTestPair focalTestPair) {
+    focalTestPair.extractTemplateInvocations(false);
   };
 
   protected abstract void addInvocations(FocalTestPair focalTestPair);

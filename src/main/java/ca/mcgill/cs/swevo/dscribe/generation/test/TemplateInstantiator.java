@@ -30,18 +30,18 @@ import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
 
 /**
  * Visits all the nodes of the scaffold focal method. If a $---$ pattern is found: 1. Check if a
  * matching element name is found for the template. 2. Check the type of the template element based
  * on the source code. 3. Cross-check to validate and substitute if types align.
  */
-public class TemplateInstantiator extends ModifierVisitor<TemplateInstance> {
+public class TemplateInstantiator extends ModifierVisitor<TemplateInvocation> {
   private static final Pattern PATTERN = Pattern.compile("\\$.*?\\$");
 
   @Override
-  public Visitable visit(EmptyStmt n, TemplateInstance arg) {
+  public Visitable visit(EmptyStmt n, TemplateInvocation arg) {
     Optional<Node> parentNode = n.getParentNode();
     if (parentNode.isEmpty()) {
       return null;
@@ -55,7 +55,7 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInstance> {
   }
 
   @Override
-  public Node visit(SimpleName md, TemplateInstance template) {
+  public Node visit(SimpleName md, TemplateInvocation template) {
     super.visit(md, template);
     Matcher matcher = PATTERN.matcher(md.getIdentifier());
     if (matcher.matches()) {
@@ -73,7 +73,7 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInstance> {
     }
   }
 
-  private static String replaceWholeNode(String identifier, TemplateInstance template) {
+  private static String replaceWholeNode(String identifier, TemplateInvocation template) {
     String name = identifier;
     if (template.containsPlaceholder(name)) {
       var value = template.getPlaceholderValue(name);
@@ -86,7 +86,7 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInstance> {
     return name;
   }
 
-  private static String replaceInnerMatches(Matcher matcher, TemplateInstance template) {
+  private static String replaceInnerMatches(Matcher matcher, TemplateInvocation template) {
     var sb = new StringBuffer();
     while (matcher.find()) {
       String name = matcher.group();
@@ -112,7 +112,7 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInstance> {
     return sb.toString();
   }
 
-  public static String resolveName(String name, TemplateInstance instance) {
+  public static String resolveName(String name, TemplateInvocation instance) {
     Matcher matcher = PATTERN.matcher(name);
     return replaceInnerMatches(matcher, instance);
   }

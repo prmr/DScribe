@@ -13,6 +13,13 @@ public class UserMessages {
   public static class TestGeneration {
     private TestGeneration() {}
 
+    public static void isMissingFocalClassNames() {
+      System.out.println(
+          "The generateTests command should include a space-seperated list of the fully qualified \n"
+              + "names of the focal classes for which to generate unit tests. For example, "
+              + "\n\t- \"generateTests java.lang.String java.lang.Integer\"");
+    }
+
     public static void isComplete(int numErrors) {
       System.out.println(String.format(GENERATION_IS_COMPLETE, "unit tests", numErrors));
     }

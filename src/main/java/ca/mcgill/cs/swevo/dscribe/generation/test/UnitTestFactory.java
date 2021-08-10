@@ -15,7 +15,7 @@ package ca.mcgill.cs.swevo.dscribe.generation.test;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
 
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
 
 public class UnitTestFactory {
   private final MethodDeclaration prototype;
@@ -24,7 +24,7 @@ public class UnitTestFactory {
     prototype = template.clone();
   }
 
-  public MethodDeclaration create(TemplateInstance instance) {
+  public MethodDeclaration create(TemplateInvocation instance) {
     MethodDeclaration clone = prototype.clone();
     clone.accept(new TemplateInstantiator(), instance);
     return clone;

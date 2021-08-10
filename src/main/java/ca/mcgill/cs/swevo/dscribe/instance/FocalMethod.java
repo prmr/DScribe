@@ -13,26 +13,17 @@
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.instance;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.gson.annotations.Expose;
-
-import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
-import ca.mcgill.cs.swevo.dscribe.utils.TypeNameResolver;
-
 /**
  * A FocalMethod is unit of test (usually a method) Holds reference to templates.
  */
-public class FocalMethod implements Iterable<TemplateInstance> {
-  @Expose
+public class FocalMethod implements Iterable<TemplateInvocation> {
   private final String name;
-  @Expose
   private final List<String> parameters;
-  @Expose
-  public List<TemplateInstance> tests = new ArrayList<>();
+  public List<TemplateInvocation> tests = new ArrayList<>();
 
   public FocalMethod(String name, List<String> parameters) {
     assert name != null;
@@ -43,13 +34,13 @@ public class FocalMethod implements Iterable<TemplateInstance> {
       this.parameters = new ArrayList<String>();
   }
 
-  public void addTest(TemplateInstance test) {
+  public void addTest(TemplateInvocation test) {
     assert test != null;
     tests.add(test);
   }
 
   @Override
-  public Iterator<TemplateInstance> iterator() {
+  public Iterator<TemplateInvocation> iterator() {
     return tests.iterator();
   }
 

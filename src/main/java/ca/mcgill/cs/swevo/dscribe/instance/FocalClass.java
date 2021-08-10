@@ -16,10 +16,8 @@ package ca.mcgill.cs.swevo.dscribe.instance;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.google.gson.annotations.Expose;
 
 /**
  * A FocalClass holds reference to different units under test (for now, units under test correspond
@@ -27,7 +25,6 @@ import com.google.gson.annotations.Expose;
  */
 
 public class FocalClass extends AbstractDScribeClass implements Iterable<FocalMethod> {
-  @Expose
   private List<FocalMethod> methods = new ArrayList<>();
 
   public FocalClass(Class<?> focalClass) {

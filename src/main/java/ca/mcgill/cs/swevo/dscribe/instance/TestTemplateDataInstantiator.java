@@ -26,7 +26,7 @@ public class TestTemplateDataInstantiator extends VoidVisitorAdapter<FocalClass>
 
         annExpr.getChildNodes()
             .forEach(n -> n.accept(ExtractTemplateData.PARAM_COLLECTOR, placeholders));
-        TemplateInstance instance = new TemplateInstance(templateName, placeholders, annExpr);
+        TemplateInvocation instance = new TemplateInvocation(templateName, placeholders, annExpr);
         FocalMethod focalMethod = getFocalMethod(focalClass, placeholders.get("$uut$")[0]);
         focalMethod.addTest(instance);
       }

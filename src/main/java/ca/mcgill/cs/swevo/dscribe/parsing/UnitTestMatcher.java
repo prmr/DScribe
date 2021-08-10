@@ -44,7 +44,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
 
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
 
 public class UnitTestMatcher extends BaseEqualityMatcher {
   private static final PrettyPrinterConfiguration PP_CONFIG = new PrettyPrinterConfiguration();
@@ -70,7 +70,7 @@ public class UnitTestMatcher extends BaseEqualityMatcher {
     this.template = template;
   }
 
-  public Optional<TemplateInstance> match(MethodDeclaration unitTest, String pkgName,
+  public Optional<TemplateInvocation> match(MethodDeclaration unitTest, String pkgName,
       String clsName) {
     values.clear();
     innameValues.clear();
@@ -87,7 +87,7 @@ public class UnitTestMatcher extends BaseEqualityMatcher {
         && values.containsKey("$method$"))) {
       return Optional.empty();
     }
-    return Optional.of(new TemplateInstance(templateName, values));
+    return Optional.of(new TemplateInvocation(templateName, values));
   }
 
   private boolean matchName(String target, String actual) {

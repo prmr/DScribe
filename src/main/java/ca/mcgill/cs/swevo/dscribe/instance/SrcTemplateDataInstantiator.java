@@ -41,7 +41,7 @@ public class SrcTemplateDataInstantiator extends VoidVisitorAdapter<FocalClass> 
 
         annExpr.getChildNodes()
             .forEach(n -> n.accept(ExtractTemplateData.PARAM_COLLECTOR, placeholders));
-        var instance = new TemplateInstance(templateName, placeholders, annExpr);
+        var instance = new TemplateInvocation(templateName, placeholders, annExpr);
         boolean isValidInstance = instance.validate(Context.instance().templateRepository());
         if (isValidInstance) {
           focalMethod.addTest(instance);

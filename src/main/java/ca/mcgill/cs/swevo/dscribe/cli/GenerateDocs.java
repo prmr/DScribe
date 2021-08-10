@@ -23,6 +23,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
+import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.DScribe;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Command;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.ParentCommand;
@@ -35,11 +36,14 @@ public class GenerateDocs implements Callable<Integer> {
   @ParentCommand
   private DScribe codit;
 
+  private Context context;
+
   @Override
   public Integer call() throws IOException, ReflectiveOperationException, URISyntaxException {
+    context = codit.getContext();
     List<FocalTestPair> focalTestPairs = collectFocalTestPairs();
     var generator = new DocGenerator(focalTestPairs);
-    generator.prepare(codit.getContext());
+    generator.prepare(context);
     generator.loadInvocations();
 
     // Inform user that generation is complete and list any errors
@@ -52,7 +56,7 @@ public class GenerateDocs implements Callable<Integer> {
   }
 
   public List<FocalTestPair> collectFocalTestPairs() throws IOException {
-    List<Path> srcPaths = codit.getContext().srcPaths();
+    List<Path> srcPaths = context.srcPaths();
     List<String> srcClassNames = new ArrayList<>();
     for (Path path : srcPaths) {
       var sourceRoot = new SourceRoot(path);
@@ -61,7 +65,8 @@ public class GenerateDocs implements Callable<Integer> {
         cu.accept(new CollectClasses(), srcClassNames);
       }
     }
-    return Utils.initFocalClasses(srcClassNames, codit.getContext().classLoader());
+    return Utils.initFocalClasses(srcClassNames, context.classLoader(),
+        context.testClassNameConvention());
   }
 
   private class CollectClasses extends VoidVisitorAdapter<List<String>> {

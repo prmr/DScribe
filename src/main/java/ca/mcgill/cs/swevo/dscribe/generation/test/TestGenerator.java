@@ -16,7 +16,6 @@ package ca.mcgill.cs.swevo.dscribe.generation.test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
@@ -24,11 +23,10 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
-
 import ca.mcgill.cs.swevo.dscribe.generation.Generator;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalMethod;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalTestPair;
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
 import ca.mcgill.cs.swevo.dscribe.instance.TestClass;
 import ca.mcgill.cs.swevo.dscribe.template.Template;
 
@@ -48,9 +46,9 @@ public class TestGenerator extends Generator {
     var focalClass = focalTestPair.focalClass();
     for (FocalMethod focalMethod : focalClass) {
       var focalMethodDecl = focalClass.getMethodDeclaration(focalMethod);
-      for (TemplateInstance instance : focalMethod) {
+      for (TemplateInvocation instance : focalMethod) {
         addDefaultPlaceholders(instance, focalClass, focalMethod);
-        List<Template> templates = repository.get(instance.getName());
+        List<Template> templates = templateRepo.get(instance.getName());
         for (Template template : templates) {
           addInvocation(focalTestPair.testClass(), focalMethodDecl, instance, template);
         }
@@ -59,7 +57,7 @@ public class TestGenerator extends Generator {
   }
 
   private void addInvocation(TestClass testClass, MethodDeclaration focalMethodDecl,
-      TemplateInstance instance, Template template) {
+      TemplateInvocation instance, Template template) {
     var testClassCU = testClass.compilationUnit();
     TypeDeclaration<?> testClassDecl = testClassCU.getType(0);
     Optional<UnitTestFactory> factory = template.getTestFactory();

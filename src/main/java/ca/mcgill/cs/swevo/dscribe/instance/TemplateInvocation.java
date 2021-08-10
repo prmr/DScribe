@@ -30,15 +30,14 @@ import ca.mcgill.cs.swevo.dscribe.utils.UserMessages;
  * A Template is a commonly seen form of code. It needs a set of params to create meaning.
  */
 
-// rename TemplateData
-public class TemplateInstance {
+public class TemplateInvocation {
   private InstanceContext context = null;
 
   private final String templateName;
   private final Map<String, PlaceholderValue> placeholders = new HashMap<>();
   private final NormalAnnotationExpr annExpr;
 
-  public TemplateInstance(String templateName, Map<String, String[]> values,
+  public TemplateInvocation(String templateName, Map<String, String[]> values,
       NormalAnnotationExpr annExpr) {
     assert templateName != null && annExpr != null;
     this.templateName = templateName;
@@ -47,7 +46,7 @@ public class TemplateInstance {
       placeholders.put(value.getKey(), new PlaceholderValue(value.getValue()));
   }
 
-  public TemplateInstance(String templateName, Map<String, String[]> values) {
+  public TemplateInvocation(String templateName, Map<String, String[]> values) {
     this(templateName, values, null);
   }
 

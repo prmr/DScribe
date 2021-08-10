@@ -16,7 +16,6 @@ package ca.mcgill.cs.swevo.dscribe.cli;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Callable;
-import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.DScribe;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Command;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Parameters;
@@ -42,10 +41,15 @@ public class GenerateTests implements Callable<Integer> {
   @Parameters
   List<String> focalClassNames;
 
-  private final Context context = codit.getContext();
 
   @Override
   public Integer call() throws URISyntaxException, ReflectiveOperationException {
+    if (focalClassNames == null || focalClassNames.isEmpty()) {
+      UserMessages.TestGeneration.isMissingFocalClassNames();
+      return 0;
+    }
+
+    var context = codit.getContext();
     // Instantiate a FocalTestPair for each focal class name
     List<FocalTestPair> focalTestPairs = Utils.initFocalClasses(focalClassNames,
         context.classLoader(), context.testClassNameConvention());

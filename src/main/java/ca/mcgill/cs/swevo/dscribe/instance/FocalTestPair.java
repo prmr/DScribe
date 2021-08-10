@@ -1,7 +1,6 @@
 package ca.mcgill.cs.swevo.dscribe.instance;
 
 import java.util.List;
-
 import com.github.javaparser.JavaParser;
 
 public class FocalTestPair implements DScribeClass {
@@ -20,7 +19,7 @@ public class FocalTestPair implements DScribeClass {
     testClass.parseCompilationUnit(parser);
   }
 
-  public void extractTemplateDataFromAnnotations(boolean docs) {
+  public void extractTemplateInvocations(boolean docs) {
     var srcInstantiator = new SrcTemplateDataInstantiator();
     var testInstantiator = new TestTemplateDataInstantiator();
     srcInstantiator.visit(focalClass.compilationUnit(), focalClass);
