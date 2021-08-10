@@ -28,6 +28,7 @@ import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Command;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.ParentCommand;
 import ca.mcgill.cs.swevo.dscribe.generation.doc.DocGenerator;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalTestPair;
+import ca.mcgill.cs.swevo.dscribe.utils.UserMessages;
 
 @Command(name = "generateDocs", mixinStandardHelpOptions = true)
 public class GenerateDocs implements Callable<Integer> {
@@ -40,11 +41,13 @@ public class GenerateDocs implements Callable<Integer> {
     var generator = new DocGenerator(focalTestPairs);
     generator.prepare(codit.getContext());
     generator.loadInvocations();
+
+    // Inform user that generation is complete and list any errors
     List<Exception> errors = generator.generate();
-    System.out.println("Finished generating documentation with " + errors.size() + " error(s).");
+    UserMessages.DocGeneration.isComplete(errors.size());
     generator.output().forEach(System.out::println);
     errors.forEach(
-        e -> System.out.println("Doc generation error: " + e.getClass() + ": " + e.getMessage()));
+        e -> UserMessages.DocGeneration.errorOccured(e.getClass().getName(), e.getMessage()));
     return 0;
   }
 

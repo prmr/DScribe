@@ -19,14 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
-import com.google.gson.annotations.Expose;
-
 import ca.mcgill.cs.swevo.dscribe.template.Placeholder;
 import ca.mcgill.cs.swevo.dscribe.template.PlaceholderType;
 import ca.mcgill.cs.swevo.dscribe.template.Template;
 import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
+import ca.mcgill.cs.swevo.dscribe.utils.UserMessages;
 
 /**
  * A Template is a commonly seen form of code. It needs a set of params to create meaning.
@@ -36,9 +34,7 @@ import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
 public class TemplateInstance {
   private InstanceContext context = null;
 
-  @Expose
   private final String templateName;
-  @Expose
   private final Map<String, PlaceholderValue> placeholders = new HashMap<>();
   private final NormalAnnotationExpr annExpr;
 
@@ -82,7 +78,7 @@ public class TemplateInstance {
 
   public boolean validate(TemplateRepository repository) {
     if (!repository.contains(templateName)) {
-      System.out.println("TEMPLATE DOES NOT EXIST:" + templateName + " is not a valid template.");
+      UserMessages.TemplateInstance.doesNotExist(templateName);
       return false;
     }
     List<Template> templates = repository.get(templateName);
@@ -92,20 +88,18 @@ public class TemplateInstance {
         String phName = placeholder.getName();
         extraPlaceholders.remove(phName);
         if (!containsPlaceholder(phName)) {
-          System.out.println("MISSING PLACEHOLDER: Missing value for placeholder " + phName + ".");
+          UserMessages.TemplateInstance.isMissingPlaceholder(phName, templateName);
           return false;
         }
         var value = getPlaceholderValue(phName);
         PlaceholderType type = placeholder.getType();
         if (!type.typeCheck(value, context)) {
-          System.out.println("PLACEHOLDER TYPE ERROR: Placeholder value " + value
-              + " failed validation for type " + type + ".");
+          UserMessages.TemplateInstance.hasPlaceholderTypeError(value, type);
           return false;
         }
       }
       if (!extraPlaceholders.isEmpty()) {
-        warnings.add("EXTRA PLACEHOLDERS: Unused placeholders " + extraPlaceholders
-            + " for template " + templateName + ".");
+        UserMessages.TemplateInstance.hasExtraPlaceholders(extraPlaceholders, templateName);
       }
     }
     return true;

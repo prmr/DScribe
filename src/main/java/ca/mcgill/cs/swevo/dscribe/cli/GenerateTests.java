@@ -22,9 +22,10 @@ import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Parameters;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.ParentCommand;
 import ca.mcgill.cs.swevo.dscribe.generation.test.TestGenerator;
 import ca.mcgill.cs.swevo.dscribe.instance.FocalTestPair;
+import ca.mcgill.cs.swevo.dscribe.utils.UserMessages;
 
 /**
- * The GenerateTests class generates unit tests for all template invocations in the given focal
+ * The GenerateTests class generates unit tests for each template invocations in the given focal
  * classes. The generated unit tests are inserted in the test class associated with the
  * corresponding focal class.
  * 
@@ -33,6 +34,7 @@ import ca.mcgill.cs.swevo.dscribe.instance.FocalTestPair;
  */
 @Command(name = "generateTests", mixinStandardHelpOptions = true)
 public class GenerateTests implements Callable<Integer> {
+
   @ParentCommand
   private DScribe codit;
 
@@ -41,15 +43,20 @@ public class GenerateTests implements Callable<Integer> {
 
   @Override
   public Integer call() throws URISyntaxException, ReflectiveOperationException {
+    // Instantiate a FocalTestPair for each FocalClass
     List<FocalTestPair> focalTestPairs =
         Utils.initFocalClasses(focalClassNames, codit.getContext().classLoader());
+
+    // Generate unit tests for each template invocation in the given FocalClasses
     var generator = new TestGenerator(focalTestPairs);
     generator.prepare(codit.getContext());
     generator.loadInvocations();
     List<Exception> errors = generator.generate();
-    System.out.println("Finished generating unit tests with " + errors.size() + " error(s).");
+
+    // Inform user that generation is complete and list any errors
+    UserMessages.TestGeneration.isComplete(errors.size());
     errors.forEach(
-        e -> System.out.println("Test generation error: " + e.getClass() + ": " + e.getMessage()));
+        e -> UserMessages.TestGeneration.errorOccurred(e.getClass().getName(), e.getMessage()));
     return errors.size();
   }
 }

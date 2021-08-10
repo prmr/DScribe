@@ -14,12 +14,10 @@
 package ca.mcgill.cs.swevo.dscribe.template;
 
 import static ca.mcgill.cs.swevo.dscribe.utils.exceptions.RepositoryException.RepositoryError.BAD_TEMPLATE;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -29,10 +27,10 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.javadoc.Javadoc;
-
 import ca.mcgill.cs.swevo.dscribe.generation.doc.DocumentationFactory;
 import ca.mcgill.cs.swevo.dscribe.generation.test.UnitTestFactory;
 import ca.mcgill.cs.swevo.dscribe.parsing.UnitTestMatcher;
+import ca.mcgill.cs.swevo.dscribe.utils.UserMessages;
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.RepositoryException;
 
 /**
@@ -65,8 +63,7 @@ public class TemplateFileParser extends VoidVisitorAdapter<List<ImportDeclaratio
   @Override
   public void visit(ClassOrInterfaceDeclaration n, List<ImportDeclaration> arg) {
     if (className != null) {
-      System.out.println(
-          "TEMPLATE FILE ERROR: Template file cannot contain nested classes or interfaces.");
+      UserMessages.TemplateFile.isMalformed();
       return;
     }
     className = n.getNameAsString();

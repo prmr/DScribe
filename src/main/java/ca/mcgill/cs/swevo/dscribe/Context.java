@@ -39,6 +39,7 @@ public class Context {
     return INSTANCE;
   }
 
+  // TO DO: Edit
   public List<Path> srcPaths() {
     return List.of(Path.of(ROOT, "JetUML", "src", "ca", "mcgill", "cs", "jetuml", "geom"),
         Path.of(ROOT, "JetUML", "src", "ca", "mcgill", "cs", "jetuml", "diagram"));
@@ -50,7 +51,7 @@ public class Context {
 
   public void setTemplateRepositoryPath(String templateRepositoryPath) {
     assert templateRepositoryPath != null;
-    templateRepoPath = templateRepositoryPath;
+    this.templateRepoPath = templateRepositoryPath;
   }
 
   public ClassLoader classLoader() {

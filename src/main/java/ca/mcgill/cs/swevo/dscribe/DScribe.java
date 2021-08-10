@@ -34,8 +34,8 @@ public class DScribe implements Runnable {
   private CommandSpec spec;
 
   /**
-   * If a subcommand e.g. codit createConfig is not specified, an error is thrown. The help menu
-   * will be displayed for the user.
+   * If a subcommand e.g. generateTests is not specified, an error is thrown. The help menu will be
+   * displayed for the user.
    */
   @Override
   public void run() {
