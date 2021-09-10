@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
-package ca.mcgill.cs.swevo.dscribe.instance;
+package ca.mcgill.cs.swevo.dscribe.template.invocation;
 
 import java.util.Collections;
 import java.util.List;

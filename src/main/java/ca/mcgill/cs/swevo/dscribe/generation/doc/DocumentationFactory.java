@@ -16,9 +16,8 @@ package ca.mcgill.cs.swevo.dscribe.generation.doc;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import ca.mcgill.cs.swevo.dscribe.instance.PlaceholderValue;
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.PlaceholderValue;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
 public class DocumentationFactory {
 
@@ -66,7 +65,7 @@ public class DocumentationFactory {
       String placeholder = matcher.group();
       if (!instance.containsPlaceholder(placeholder)) {
         throw new IllegalArgumentException(
-            "Invalid placeholder name '" + placeholder + "' for template " + instance.getName());
+            "Invalid placeholder name '" + placeholder + "' for template " + instance.getTemplateName());
       }
       PlaceholderValue value = instance.getPlaceholderValue(placeholder);
       String replacement;

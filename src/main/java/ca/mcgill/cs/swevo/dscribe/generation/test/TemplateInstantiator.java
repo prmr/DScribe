@@ -29,8 +29,7 @@ import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
-
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
 /**
  * Visits all the nodes of the scaffold focal method. If a $---$ pattern is found: 1. Check if a
@@ -104,7 +103,7 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInvocation> {
         }
       } else {
         throw new IllegalArgumentException(
-            "Invalid placeholder name '" + name + "' for template " + template.getName());
+            "Invalid placeholder name '" + name + "' for template " + template.getTemplateName());
       }
     }
     // Perform the node string replacement.

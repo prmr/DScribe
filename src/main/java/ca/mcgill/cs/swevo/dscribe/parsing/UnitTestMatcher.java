@@ -43,8 +43,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
-
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
 public class UnitTestMatcher extends BaseEqualityMatcher {
   private static final PrettyPrinterConfiguration PP_CONFIG = new PrettyPrinterConfiguration();

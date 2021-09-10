@@ -14,8 +14,7 @@
 package ca.mcgill.cs.swevo.dscribe.generation.test;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
-
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInvocation;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
 public class UnitTestFactory {
   private final MethodDeclaration prototype;

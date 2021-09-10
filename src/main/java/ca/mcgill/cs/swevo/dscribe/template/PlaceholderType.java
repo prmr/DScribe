@@ -15,14 +15,12 @@ package ca.mcgill.cs.swevo.dscribe.template;
 
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.Name;
-
-import ca.mcgill.cs.swevo.dscribe.instance.InstanceContext;
-import ca.mcgill.cs.swevo.dscribe.instance.PlaceholderValue;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.InstanceContext;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.PlaceholderValue;
 import ca.mcgill.cs.swevo.dscribe.utils.TypeNameResolver;
 
 public enum PlaceholderType {
@@ -100,7 +98,7 @@ public enum PlaceholderType {
   }
 
   private static boolean isExpr(String value) {
-    JavaParser parser = new JavaParser();
+    var parser = new JavaParser();
     ParseResult<Expression> res = parser.parseExpression(value);
     return res.isSuccessful();
   }

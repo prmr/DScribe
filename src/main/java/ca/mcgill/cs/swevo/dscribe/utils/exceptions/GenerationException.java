@@ -25,7 +25,7 @@ public class GenerationException extends RuntimeException {
     super("Generation error due to " + error.name(), cause);
   }
 
-  public static enum GenerationError {
+  public enum GenerationError {
     MISSING_SOURCE_FILE, INVALID_SOURCE_FILE, IO_ERROR
   }
 }

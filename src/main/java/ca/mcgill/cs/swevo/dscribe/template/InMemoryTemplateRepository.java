@@ -14,17 +14,14 @@
 package ca.mcgill.cs.swevo.dscribe.template;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
-
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.RepositoryException;
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.RepositoryException.RepositoryError;
 
@@ -37,14 +34,13 @@ public class InMemoryTemplateRepository implements TemplateRepository {
   private final Map<String, List<Template>> templateMethods = new HashMap<>();
 
   public InMemoryTemplateRepository(String sourceFolder) {
-    SourceRoot scaffolds = new SourceRoot(Paths.get(sourceFolder));
+    var scaffolds = new SourceRoot(Paths.get(sourceFolder));
     try {
       scaffolds.tryToParse();
     } catch (IOException e) {
       throw new RepositoryException(RepositoryError.EXTERNAL_IO, e);
     }
-    TemplateFileParser repositoryParser = new TemplateFileParser(this::addTemplate);
-    List<CompilationUnit> cus = scaffolds.getCompilationUnits();
+    var repositoryParser = new TemplateFileParser(this::addTemplate);
     for (CompilationUnit scaffoldCu : scaffolds.getCompilationUnits()) {
       scaffoldCu.accept(repositoryParser, new ArrayList<>());
     }
