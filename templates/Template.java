@@ -11,7 +11,7 @@ public class Template
 	@Template("AssertThrows")
 	@Types($state$=EXPR, $factory$=EXPR, $exType$=EXCEPTION, $params$=EXPR_LIST)
 	@Test
-	public void test_$method$_when$state$_throws$exType$()
+	public void $method$_when$state$_throws$exType$()
 	{
 		assertThrows($exType$.class, () -> $factory$.$method$($params$)); 
 	}
@@ -28,15 +28,15 @@ public class Template
 //	    assertEquals($oracle$, capture.getMessage());	
 //	}
 //	
-//	/**
-//	 *	Test doc frag 
-//	 */
-//	@Template("AssertBool")
-//    @Types($state$=EXPR, $bool$=EXPR, $factory$=EXPR, $params$=EXPR_LIST)
-//    @Test
-//    public void test_$method$_$state$() {
-//        assert$bool$($factory$.$method$($params$));
-//    }
+
+	/** $method$ returns $bool$ when called with $params$ */
+	@Template("AssertBool")
+	@Types($state$=EXPR, $bool$=EXPR, $factory$=EXPR, $params$=EXPR_LIST)
+	@Test
+	public void test_$method$_$state$_$bool$() {
+		boolean actual = $factory$.$method$($params$); 
+	    assert$bool$(actual);
+	}
 	
 //	@Template(“EqualsContract”)
 //	@Types($factory1$=EXPR, $factory2$=EXPR, $factory3$=EXPR)

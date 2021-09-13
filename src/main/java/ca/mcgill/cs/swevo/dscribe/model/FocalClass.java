@@ -28,17 +28,10 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 public class FocalClass extends AbstractClass implements Iterable<FocalMethod>
 {
 	private final List<FocalMethod> methods = new ArrayList<>();
-	private final Class<?> clazz;
 
-	public FocalClass(Path path, Class<?> clazz)
+	public FocalClass(Path path)
 	{
 		super(path);
-		this.clazz = clazz;
-	}
-
-	public String getName()
-	{
-		return clazz.getCanonicalName();
 	}
 
 	public void addFocalMethod(FocalMethod focalMethod)
@@ -48,12 +41,14 @@ public class FocalClass extends AbstractClass implements Iterable<FocalMethod>
 
 	public String getSimpleName()
 	{
-		return clazz.getSimpleName();
+		assert compilationUnit() != null;
+		return getClassDeclaration().getName().asString();
 	}
 
 	public String getPackageName()
 	{
-		return clazz.getPackageName();
+		assert compilationUnit() != null;
+		return compilationUnit().getPackageDeclaration().get().getNameAsString();
 	}
 
 	public List<FocalMethod> getMethods()

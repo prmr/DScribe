@@ -56,11 +56,11 @@ public class GenerateTests implements Callable<Integer>
 		// Generate unit tests for each template invocation in the focal and test classes
 		var generator = new TestGenerator(focalTestPairs, context.templateRepository());
 		generator.prepare();
-		generator.generate();
+		List<String> modifiedTestClasses = generator.generate();
 		List<Exception> errors = generator.save();
 
 		// Inform the user that the generation is complete and list any errors
-		UserMessages.TestGeneration.isComplete(errors.size());
+		UserMessages.TestGeneration.isComplete(errors.size(), modifiedTestClasses);
 		errors.forEach(e -> UserMessages.TestGeneration.errorOccurred(e.getClass().getName(), e.getMessage()));
 		return errors.size();
 	}

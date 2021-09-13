@@ -13,6 +13,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.Problem;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.GenerationException;
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.GenerationException.GenerationError;
@@ -33,9 +34,10 @@ public abstract class AbstractClass implements Parseable
 		return cu;
 	}
 
-	public Path path()
+	public String getName()
 	{
-		return path;
+		assert cu != null;
+		return getClassDeclaration().getFullyQualifiedName().get();
 	}
 
 	/**
@@ -88,5 +90,11 @@ public abstract class AbstractClass implements Parseable
 		Problem firstProblem = parseResult.getProblem(0);
 		Optional<Throwable> cause = firstProblem.getCause();
 		return cause.orElse(null);
+	}
+
+	protected ClassOrInterfaceDeclaration getClassDeclaration()
+	{
+		assert cu != null;
+		return (ClassOrInterfaceDeclaration) cu.getType(0);
 	}
 }

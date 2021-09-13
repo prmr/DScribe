@@ -1,15 +1,14 @@
 package ca.mcgill.cs.swevo.dscribe.model;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.Context.TestClassNameConvention;
+import ca.mcgill.cs.swevo.dscribe.cli.Utils;
 import ca.mcgill.cs.swevo.dscribe.utils.UserMessages;
 
 /**
@@ -51,6 +50,10 @@ public class FocalTestPairFactory
 		}
 		String testClassName = testClassName(focalClassName);
 		TestClass testClass = buildTestClass(testClassName);
+		if (testClass == null)
+		{
+			return null;
+		}
 		return new FocalTestPair(focalClass, testClass);
 	}
 
@@ -63,26 +66,23 @@ public class FocalTestPairFactory
 	 */
 	private FocalClass buildFocalClass(String focalClassName)
 	{
-		Class<?> focalClass = resolveClassName(focalClassName);
-		if (focalClass == null)
+		Path path = getPathToClass(focalClassName, context.sourceFolder());
+		if (path == null)
 		{
 			UserMessages.ParsingWarning.unresolvedFocal(focalClassName);
 			return null;
 		}
-		Path path = getPathToClass(focalClass, context.sourceFolder());
-		// TODO: check if path exists
-		return new FocalClass(path, focalClass);
+		return new FocalClass(path);
 	}
 
 	private TestClass buildTestClass(String testClassName)
 	{
-		Class<?> testClass = resolveClassName(testClassName);
-		if (testClass == null)
+		Path path = getPathToClass(testClassName, context.testFolder());
+		if (path == null)
 		{
-			// TODO: create empty test class file
+			// TODO: If generateDocs, dont care about not resolving test classes
+			return null;
 		}
-		Path path = getPathToClass(testClass, context.testFolder());
-		// TODO: check if path exists
 		return new TestClass(path);
 	}
 
@@ -94,54 +94,25 @@ public class FocalTestPairFactory
 	 * @param targetFolder
 	 *            the folder in which to look for the Java class file
 	 */
-	private Path getPathToClass(Class<?> clazz, String targetFolder)
+	private Path getPathToClass(String className, String targetFolder)
 	{
-		String resourceName = resourceName(clazz);
+		String resourceName = resourceName(className);
 		URL binUrl = context.classLoader().getResource(resourceName);
-		Path binPath = Paths.get(URI.create(binUrl.toString()));
-		Path classPath = getClassPathFromBinPath(binPath, targetFolder);
-		return classPath;
+		if (binUrl != null)
+		{
+			Path binPath = Paths.get(URI.create(binUrl.toString()));
+			Path classPath = Utils.getClassPathFromBinPath(binPath, targetFolder, context.binFolder());
+			return classPath;
+		}
+		return null;
 	}
 
 	/**
 	 * Get resource name of the corresponding class
 	 */
-	private String resourceName(Class<?> clazz)
+	private String resourceName(String className)
 	{
-		return clazz.getName().replaceAll(Pattern.quote("."), "/") + ".class";
-	}
-
-	/**
-	 * Get the path to the Java class file (.java) from the path to the binary class file (.class)
-	 * 
-	 * @param binPath
-	 *            the path to the binary class file (.class)
-	 * @param targetFolder
-	 *            the folder to look for the Java class file
-	 */
-	private Path getClassPathFromBinPath(Path binPath, String targetFolder)
-	{
-		String binFolder = Pattern.quote(File.separator + context.binFolder() + File.separator);
-		String srcFolder = Matcher.quoteReplacement(File.separator + targetFolder + File.separator);
-		String binExt = Pattern.quote(".class");
-		String srcExt = Matcher.quoteReplacement(".java");
-		String binLocation = binPath.toString();
-		String srcLocation = binLocation.replaceFirst(binFolder, srcFolder).replaceFirst(binExt, srcExt);
-		return Paths.get(srcLocation);
-	}
-
-	private Class<?> resolveClassName(String className)
-	{
-		Class<?> resolved;
-		try
-		{
-			resolved = Class.forName(className, false, context.classLoader());
-		}
-		catch (ClassNotFoundException e)
-		{
-			resolved = null;
-		}
-		return resolved;
+		return className.replaceAll(Pattern.quote("."), "/") + ".class";
 	}
 
 	/**

@@ -13,8 +13,10 @@
 package ca.mcgill.cs.swevo.dscribe.generation.test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -34,9 +36,12 @@ import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
 public class TestGenerator extends Generator
 {
-	public TestGenerator(List<FocalTestPair> focalTestPairs, TemplateRepository templateRepository)
+	Set<String> modifiedTestClasses;
+
+	public TestGenerator(List<FocalTestPair> focalTestPairs, TemplateRepository templateRepo)
 	{
-		super(focalTestPairs, templateRepository);
+		super(focalTestPairs, templateRepo);
+		modifiedTestClasses = new HashSet<>();
 	}
 
 	/**
@@ -67,6 +72,7 @@ public class TestGenerator extends Generator
 			addTest(testClassDecl, testMethodDecl, invocation);
 			addImports(testClassCU, template);
 			moveAnnotation(focalMethodDecl, testMethodDecl, invocation.getAnnotationExpr());
+			modifiedTestClasses.add(testClass.getName());
 		}
 	}
 
@@ -116,5 +122,17 @@ public class TestGenerator extends Generator
 			testClassDecl.remove(oldTest);
 		}
 		testClassDecl.addMember(newTest);
+	}
+
+	@Override
+	protected void preGenerate()
+	{
+		modifiedTestClasses.clear();
+	}
+
+	@Override
+	protected List<String> postGenerate()
+	{
+		return new ArrayList<>(modifiedTestClasses);
 	}
 }

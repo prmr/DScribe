@@ -13,8 +13,6 @@
 package ca.mcgill.cs.swevo.dscribe;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
 
 import ca.mcgill.cs.swevo.dscribe.template.InMemoryTemplateRepository;
 import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
@@ -48,14 +46,6 @@ public class Context
 	protected static Context instance()
 	{
 		return INSTANCE;
-	}
-
-	// TODO: Edit
-	public List<Path> srcPaths()
-	{
-		String root = Paths.get("..").toAbsolutePath().normalize().toString();
-		return List.of(Path.of(root, "JetUML", "src", "ca", "mcgill", "cs", "jetuml", "geom"),
-				Path.of(root, "JetUML", "src", "ca", "mcgill", "cs", "jetuml", "diagram"));
 	}
 
 	public String templateRepositoryPath()

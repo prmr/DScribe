@@ -1,5 +1,6 @@
 package ca.mcgill.cs.swevo.dscribe.utils;
 
+import java.util.List;
 import java.util.Set;
 
 import ca.mcgill.cs.swevo.dscribe.template.PlaceholderType;
@@ -7,11 +8,16 @@ import ca.mcgill.cs.swevo.dscribe.template.invocation.PlaceholderValue;
 
 public class UserMessages
 {
-	private static final String GENERATION_IS_COMPLETE = "Finished generating %s with %d error(s).";
+	private static final String GENERATION_IS_COMPLETE = "\nFinished generating %s with %d error(s).";
 	private static final String GENERATION_ERROR_OCCURRED = "%s generation error: %s : %s";
 
 	private UserMessages()
 	{
+	}
+
+	private static void printModifiedClasses(List<String> modifiedClasses)
+	{
+		modifiedClasses.stream().map(c -> String.format("\t- %s\n", c)).forEach(System.out::println);
 	}
 
 	public static class TestGeneration
@@ -28,9 +34,11 @@ public class UserMessages
 							+ "\n\t- \"generateTests java.lang.String java.lang.Integer\"");
 		}
 
-		public static void isComplete(int numErrors)
+		public static void isComplete(int numErrors, List<String> modifiedTestClasses)
 		{
 			System.out.println(String.format(GENERATION_IS_COMPLETE, "unit tests", numErrors));
+			System.out.println("Added new unit tests in:");
+			printModifiedClasses(modifiedTestClasses);
 		}
 
 		public static void errorOccurred(String errorClass, String errorMessage)
@@ -45,9 +53,17 @@ public class UserMessages
 		{
 		}
 
-		public static void isComplete(int numErrors)
+		public static void isMissingPackageName()
+		{
+			System.out.println(
+					"The generateDocs command should include a the fully qualified package name for which to generate documentation.");
+		}
+
+		public static void isComplete(int numErrors, List<String> modifiedClasses)
 		{
 			System.out.println(String.format(GENERATION_IS_COMPLETE, "documentation", numErrors));
+			System.out.println("Added documentation in:");
+			printModifiedClasses(modifiedClasses);
 		}
 
 		public static void errorOccured(String errorClass, String errorMessage)

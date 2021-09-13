@@ -46,9 +46,12 @@ public class TemplateInvocation
 	{
 		assert templateName != null && annExpr != null;
 		this.templateName = templateName;
-		this.annExpr = annExpr.clone();
 		for (Entry<String, String[]> value : values.entrySet())
+		{
 			placeholders.put(value.getKey(), new PlaceholderValue(value.getValue()));
+		}
+		this.annExpr = annExpr.clone();
+		oldTestMethod = Optional.empty();
 	}
 
 	public TemplateInvocation(String templateName, Map<String, String[]> values)

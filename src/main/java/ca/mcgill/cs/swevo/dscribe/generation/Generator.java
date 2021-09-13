@@ -61,9 +61,12 @@ public abstract class Generator
 	/**
 	 * For each template invocation in the focalTestPairs, generate the corresponding unit test or documentation
 	 * fragment.
+	 * 
+	 * @return
 	 */
-	public final void generate()
+	public final List<String> generate()
 	{
+		preGenerate();
 		for (FocalTestPair focalTestPair : focalTestPairs)
 		{
 			var focalClass = focalTestPair.focalClass();
@@ -81,6 +84,7 @@ public abstract class Generator
 				}
 			}
 		}
+		return postGenerate();
 	}
 
 	/**
@@ -144,4 +148,8 @@ public abstract class Generator
 
 	protected abstract void generate(FocalClass focalClass, MethodDeclaration focalMethodDecl, TestClass testClass,
 			TemplateInvocation invocation, Template template);
+
+	protected abstract void preGenerate();
+
+	protected abstract List<String> postGenerate();
 }
