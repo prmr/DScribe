@@ -10,6 +10,9 @@ public class UserMessages
 {
 	private static final String GENERATION_IS_COMPLETE = "\nFinished generating %s with %d error(s).";
 	private static final String GENERATION_ERROR_OCCURRED = "%s generation error: %s : %s";
+	private static final String MISSING_FOCAL_CLASS_NAMES = "The %s command should include a space-seperated list "
+			+ "of the fully qualified \nnames of the focal classes for which to generate unit tests. For example,"
+			+ " \n\t- \"generateTests java.lang.String java.lang.Integer\"";
 
 	private UserMessages()
 	{
@@ -28,10 +31,7 @@ public class UserMessages
 
 		public static void isMissingFocalClassNames()
 		{
-			System.out.println(
-					"The generateTests command should include a space-seperated list of the fully qualified \n"
-							+ "names of the focal classes for which to generate unit tests. For example, "
-							+ "\n\t- \"generateTests java.lang.String java.lang.Integer\"");
+			System.out.println(String.format(MISSING_FOCAL_CLASS_NAMES, "generateTests"));
 		}
 
 		public static void isComplete(int numErrors, List<String> modifiedTestClasses)
@@ -53,10 +53,9 @@ public class UserMessages
 		{
 		}
 
-		public static void isMissingPackageName()
+		public static void isMissingFocalClassNames()
 		{
-			System.out.println(
-					"The generateDocs command should include a the fully qualified package name for which to generate documentation.");
+			System.out.println(String.format(MISSING_FOCAL_CLASS_NAMES, "generateDocs"));
 		}
 
 		public static void isComplete(int numErrors, List<String> modifiedClasses)

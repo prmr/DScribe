@@ -12,21 +12,11 @@
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.cli;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.DScribe;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Command;
 import ca.mcgill.cs.swevo.dscribe.cli.CommandLine.Parameters;
@@ -42,21 +32,22 @@ public class GenerateDocs implements Callable<Integer>
 	private DScribe codit;
 
 	@Parameters
-	String packageName;
+	List<String> focalClassNames;
 
 	@Override
 	public Integer call() throws IOException, ReflectiveOperationException, URISyntaxException
 	{
-		if (packageName == null || packageName.isEmpty())
+		if (focalClassNames == null || focalClassNames.isEmpty())
 		{
-			UserMessages.DocGeneration.isMissingPackageName();
+			UserMessages.DocGeneration.isMissingFocalClassNames();
 			return 0;
 		}
 
+		// Create a FocalTestPair instance for each focal class name
 		var context = codit.getContext();
-		List<String> focalClassNames = collectFocalClassNames(packageName, context);
 		List<FocalTestPair> focalTestPairs = Utils.initFocalClasses(focalClassNames, context);
 
+		// Generate documentation for each template invocation in the focal and test classes
 		var generator = new DocGenerator(focalTestPairs, context.templateRepository());
 		generator.prepare();
 		List<String> modifiedClasses = generator.generate();
@@ -66,39 +57,5 @@ public class GenerateDocs implements Callable<Integer>
 		UserMessages.DocGeneration.isComplete(errors.size(), modifiedClasses);
 		errors.forEach(e -> UserMessages.DocGeneration.errorOccured(e.getClass().getName(), e.getMessage()));
 		return errors.size();
-	}
-
-	public List<String> collectFocalClassNames(String packageName, Context context)
-	{
-		Path packagePath = pathToPackage(packageName, context);
-		List<String> focalClassNames;
-		try
-		{
-			focalClassNames = Files	.walk(packagePath)
-									.filter(p -> p.toString().endsWith(".java"))
-									.map(p -> classNameFromPath(p, packageName))
-									.collect(Collectors.toList());
-		}
-		catch (IOException e)
-		{
-			return Collections.emptyList();
-		}
-		return focalClassNames;
-	}
-
-	private Path pathToPackage(String packageName, Context context)
-	{
-		String resourcePath = packageName.replace('.', '/');
-		URL binUrl = context.classLoader().getResource(resourcePath);
-		Path binPath = Paths.get(URI.create(binUrl.toString()));
-		return Utils.getClassPathFromBinPath(binPath, context.sourceFolder(), context.binFolder());
-	}
-
-	private String classNameFromPath(Path classPath, String packageName)
-	{
-		String classPathAsString = classPath.toAbsolutePath().toString();
-		classPathAsString = classPathAsString.replaceAll(Pattern.quote(File.separator), ".");
-		int idx = classPathAsString.indexOf(packageName);
-		return classPathAsString.substring(idx, classPathAsString.length() - 5);
 	}
 }

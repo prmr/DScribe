@@ -93,6 +93,7 @@ public class FocalTestPairFactory
 	 *            the Class instance for which to retrieve a path
 	 * @param targetFolder
 	 *            the folder in which to look for the Java class file
+	 * @throws ClassNotFoundException
 	 */
 	private Path getPathToClass(String className, String targetFolder)
 	{
