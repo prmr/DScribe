@@ -37,8 +37,12 @@ public class UserMessages
 		public static void isComplete(int numErrors, List<String> modifiedTestClasses)
 		{
 			System.out.println(String.format(GENERATION_IS_COMPLETE, "unit tests", numErrors));
-			System.out.println("Added new unit tests in:");
-			printModifiedClasses(modifiedTestClasses);
+			if (!modifiedTestClasses.isEmpty())
+			{
+				System.out.println("Added new unit tests in:");
+				printModifiedClasses(modifiedTestClasses);
+			}
+
 		}
 
 		public static void errorOccurred(String errorClass, String errorMessage)
@@ -61,8 +65,11 @@ public class UserMessages
 		public static void isComplete(int numErrors, List<String> modifiedClasses)
 		{
 			System.out.println(String.format(GENERATION_IS_COMPLETE, "documentation", numErrors));
-			System.out.println("Added documentation in:");
-			printModifiedClasses(modifiedClasses);
+			if (!modifiedClasses.isEmpty())
+			{
+				System.out.println("Added documentation in:");
+				printModifiedClasses(modifiedClasses);
+			}
 		}
 
 		public static void errorOccured(String errorClass, String errorMessage)
@@ -75,6 +82,13 @@ public class UserMessages
 	{
 		private ParsingWarning()
 		{
+		}
+
+		public static void unresolvedProperties(String propertiesLocation)
+		{
+			System.out.println(String.format(
+					"Cannot find DScribe properties file. It should be located at %s. Trying to run with default properties.",
+					propertiesLocation));
 		}
 
 		public static void unresolvedFocal(String focalName)

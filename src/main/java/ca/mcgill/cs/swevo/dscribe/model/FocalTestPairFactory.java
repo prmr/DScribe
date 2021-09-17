@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.regex.Pattern;
 
 import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.Context.TestClassNameConvention;
@@ -52,7 +51,7 @@ public class FocalTestPairFactory
 		TestClass testClass = buildTestClass(testClassName);
 		if (testClass == null)
 		{
-			return null;
+			UserMessages.ParsingWarning.unresolvedTest(testClassName);
 		}
 		return new FocalTestPair(focalClass, testClass);
 	}
@@ -97,7 +96,7 @@ public class FocalTestPairFactory
 	 */
 	private Path getPathToClass(String className, String targetFolder)
 	{
-		String resourceName = resourceName(className);
+		String resourceName = Utils.resourceName(className);
 		URL binUrl = context.classLoader().getResource(resourceName);
 		if (binUrl != null)
 		{
@@ -106,14 +105,6 @@ public class FocalTestPairFactory
 			return classPath;
 		}
 		return null;
-	}
-
-	/**
-	 * Get resource name of the corresponding class
-	 */
-	private String resourceName(String className)
-	{
-		return className.replaceAll(Pattern.quote("."), "/") + ".class";
 	}
 
 	/**

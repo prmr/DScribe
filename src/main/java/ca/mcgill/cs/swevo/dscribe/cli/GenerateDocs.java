@@ -25,6 +25,14 @@ import ca.mcgill.cs.swevo.dscribe.generation.doc.DocGenerator;
 import ca.mcgill.cs.swevo.dscribe.model.FocalTestPair;
 import ca.mcgill.cs.swevo.dscribe.utils.UserMessages;
 
+/**
+ * The GenerateDocs class generates documentation fragments for each template invocation in the given focal classes and
+ * their corresponding test classes. The generated documentation fragments are inserted in the JavaDoc comment of the
+ * corresponding focal method.
+ * 
+ * @author Alexa
+ *
+ */
 @Command(name = "generateDocs", mixinStandardHelpOptions = true)
 public class GenerateDocs implements Callable<Integer>
 {
@@ -42,9 +50,11 @@ public class GenerateDocs implements Callable<Integer>
 			UserMessages.DocGeneration.isMissingFocalClassNames();
 			return 0;
 		}
-
-		// Create a FocalTestPair instance for each focal class name
+		// Configure context
 		var context = codit.getContext();
+		Utils.configureContext(context, focalClassNames.get(0));
+
+		// // Create a FocalTestPair instance for each focal class name
 		List<FocalTestPair> focalTestPairs = Utils.initFocalClasses(focalClassNames, context);
 
 		// Generate documentation for each template invocation in the focal and test classes

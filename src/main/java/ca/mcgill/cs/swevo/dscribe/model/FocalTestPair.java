@@ -11,6 +11,12 @@ import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 import ca.mcgill.cs.swevo.dscribe.template.invocation.TestTemplateInvocationExtractor;
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.GenerationException;
 
+/**
+ * A FocalTestPair represents links a focal class to its corresponding test class.
+ * 
+ * @author Alexa
+ *
+ */
 public class FocalTestPair implements Parseable
 {
 	private final FocalClass focalClass;

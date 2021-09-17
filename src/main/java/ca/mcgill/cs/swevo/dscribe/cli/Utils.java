@@ -1,16 +1,23 @@
 package ca.mcgill.cs.swevo.dscribe.cli;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.model.FocalTestPair;
 import ca.mcgill.cs.swevo.dscribe.model.FocalTestPairFactory;
+import ca.mcgill.cs.swevo.dscribe.utils.UserMessages;
 
 /**
  * The Utils class provides functionality to instantiate a list of FocalTestPairs given a list of focal class names. To
@@ -75,5 +82,40 @@ public class Utils
 		String binLocation = binPath.toString();
 		String srcLocation = binLocation.replaceFirst(binFolder, srcFolder).replaceFirst(binExt, srcExt);
 		return Paths.get(srcLocation);
+	}
+
+	/**
+	 * Get resource name of the corresponding class
+	 */
+	public static String resourceName(String className)
+	{
+		return className.replaceAll(Pattern.quote("."), "/") + ".class";
+	}
+
+	/**
+	 * Configure the context variables with the values defined in the user's project's /dscribe/config.properties file.
+	 * 
+	 * @param context
+	 *            the context of the DScribe execution
+	 * @param className
+	 *            the name of a class in the project
+	 */
+	public static void configureContext(Context context, String className)
+	{
+		URL resourceUrl = context.classLoader().getResource(resourceName(className));
+		String resourcePath = Paths.get(URI.create(resourceUrl.toString())).toString();
+		String projectPath = resourcePath.substring(0, resourcePath.indexOf("bin"));
+		String propertiesPath = projectPath + "dscribe/config.properties";
+		try (InputStream input = new FileInputStream(propertiesPath))
+		{
+			var properties = new Properties();
+			properties.load(input);
+			context.configure(projectPath, properties);
+		}
+		catch (IOException e1)
+		{
+			UserMessages.ParsingWarning.unresolvedProperties(propertiesPath);
+		}
+
 	}
 }

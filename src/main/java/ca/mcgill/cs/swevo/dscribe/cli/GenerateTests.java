@@ -43,14 +43,17 @@ public class GenerateTests implements Callable<Integer>
 	@Override
 	public Integer call() throws URISyntaxException, ReflectiveOperationException
 	{
+
 		if (focalClassNames == null || focalClassNames.isEmpty())
 		{
 			UserMessages.TestGeneration.isMissingFocalClassNames();
 			return 0;
 		}
+		// Configure context
+		var context = codit.getContext();
+		Utils.configureContext(context, focalClassNames.get(0));
 
 		// Create a FocalTestPair instance for each focal class name
-		var context = codit.getContext();
 		List<FocalTestPair> focalTestPairs = Utils.initFocalClasses(focalClassNames, context);
 
 		// Generate unit tests for each template invocation in the focal and test classes

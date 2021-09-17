@@ -19,7 +19,8 @@ import java.util.List;
 import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
 /**
- * A FocalMethod is unit of test (usually a method) Holds reference to templates.
+ * A FocalMethod represents a unit under test. It holds reference to a list of template invocations for which it is the
+ * unit under test.
  */
 public class FocalMethod implements Iterable<TemplateInvocation>
 {
