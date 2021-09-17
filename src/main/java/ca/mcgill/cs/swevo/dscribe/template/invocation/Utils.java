@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-
-import ca.mcgill.cs.swevo.dscribe.annotation.DScribeAnnotations;
 
 /**
  * The TemplateInvaocationExtraction class provides helper functions to facilitate: (1) identifying template invocations
@@ -23,23 +20,9 @@ public class Utils
 {
 	protected static final PlaceholderCollector PLACEHOLDER_COLLECTOR = new PlaceholderCollector();
 	protected static final PlaceholderValueResolver PLACEHOLDER_VAL_RESOLVER = new PlaceholderValueResolver();
-	private static final List<String> DS_ANN_NAMES = DScribeAnnotations.annotations();
 
 	private Utils()
 	{
-	}
-
-	/**
-	 * Determine whether the given annotation expression represents a DScribe template invocation.
-	 * 
-	 * @param annExpr
-	 *            the annotation expression node to check
-	 * @return true if the annotation expression represents a DScribe template invocation. False otherwise.
-	 */
-	protected static boolean isDScribeAnnotation(AnnotationExpr annExpr)
-	{
-		String annName = annExpr.resolve().getQualifiedName();
-		return DS_ANN_NAMES.contains(annName);
 	}
 
 	/**

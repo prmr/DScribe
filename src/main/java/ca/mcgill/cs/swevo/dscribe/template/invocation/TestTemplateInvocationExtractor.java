@@ -9,6 +9,7 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import ca.mcgill.cs.swevo.dscribe.model.FocalClass;
 import ca.mcgill.cs.swevo.dscribe.model.FocalMethod;
+import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
 
 /**
  * The TestTemplateInvocationExtractor class extracts all DScribe template invocations that are present in a given test
@@ -22,11 +23,21 @@ import ca.mcgill.cs.swevo.dscribe.model.FocalMethod;
 public class TestTemplateInvocationExtractor extends VoidVisitorAdapter<FocalClass>
 {
 	private static final InvocationDataCollector INVOCATION_DATA_COLLECTOR = new InvocationDataCollector();
+	private final TemplateRepository templateRepo;
+
+	public TestTemplateInvocationExtractor(TemplateRepository templateRepo)
+	{
+		assert templateRepo != null;
+		this.templateRepo = templateRepo;
+	}
 
 	@Override
 	public void visit(MethodDeclaration md, FocalClass focalClass)
 	{
-		md.getAnnotations().forEach(a -> a.accept(INVOCATION_DATA_COLLECTOR, focalClass));
+		md	.getAnnotations()
+			.stream()
+			.filter(a -> templateRepo.contains(a.getNameAsString())) // filter out non-dscribe annotationS
+			.forEach(a -> a.accept(INVOCATION_DATA_COLLECTOR, focalClass));
 	}
 
 	private static class InvocationDataCollector extends VoidVisitorAdapter<FocalClass>
@@ -38,25 +49,22 @@ public class TestTemplateInvocationExtractor extends VoidVisitorAdapter<FocalCla
 		@Override
 		public void visit(NormalAnnotationExpr annExpr, FocalClass focalClass)
 		{
-			if (Utils.isDScribeAnnotation(annExpr))
+			var templateName = annExpr.getNameAsString();
+			Map<String, String[]> placeholders = new HashMap<>();
+
+			annExpr.getChildNodes().forEach(n -> n.accept(Utils.PLACEHOLDER_COLLECTOR, placeholders));
+
+			var invocation = new TemplateInvocation(templateName, placeholders, annExpr);
+
+			MethodDeclaration methodDecl = (MethodDeclaration) (annExpr.getParentNode().get());
+			invocation.setOldTest(methodDecl);
+
+			var focalMethod = getFocalMethod(focalClass, placeholders.get("$uut$")[0]);
+			if (focalMethod != null)
 			{
-				var templateName = annExpr.getNameAsString();
-				Map<String, String[]> placeholders = new HashMap<>();
-
-				annExpr.getChildNodes().forEach(n -> n.accept(Utils.PLACEHOLDER_COLLECTOR, placeholders));
-
-				var invocation = new TemplateInvocation(templateName, placeholders, annExpr);
-
-				MethodDeclaration methodDecl = (MethodDeclaration) (annExpr.getParentNode().get());
-				invocation.setOldTest(methodDecl);
-
-				var focalMethod = getFocalMethod(focalClass, placeholders.get("$uut$")[0]);
-				if (focalMethod != null)
-				{
-					focalMethod.addTest(invocation);
-				}
-				// TODO: Add error here
+				focalMethod.addTest(invocation);
 			}
+			// TODO: Add error here
 		}
 
 		/**

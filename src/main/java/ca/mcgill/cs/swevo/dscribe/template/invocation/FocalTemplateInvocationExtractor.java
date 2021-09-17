@@ -24,10 +24,14 @@ import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
  */
 public class FocalTemplateInvocationExtractor extends VoidVisitorAdapter<FocalClass>
 {
-
-	private TemplateRepository templateRepo;
-
 	private static final InvocationDataCollector INVOCATION_DATA_COLLECTOR = new InvocationDataCollector();
+	private final TemplateRepository templateRepo;
+
+	public FocalTemplateInvocationExtractor(TemplateRepository templateRepo)
+	{
+		assert templateRepo != null;
+		this.templateRepo = templateRepo;
+	}
 
 	/**
 	 * Create a new FocalMethod instance for the given method declaration and add it to the focal class. For each
@@ -47,7 +51,10 @@ public class FocalTemplateInvocationExtractor extends VoidVisitorAdapter<FocalCl
 		methodDecl.getParameters().forEach(p -> params.add(p.getTypeAsString()));
 		var focalMethod = new FocalMethod(methodName, params);
 
-		methodDecl.getAnnotations().forEach(a -> a.accept(INVOCATION_DATA_COLLECTOR, focalMethod));
+		methodDecl	.getAnnotations()
+					.stream()
+					.filter(a -> templateRepo.contains(a.getNameAsString())) // filter out non-dscribe annotations
+					.forEach(a -> a.accept(INVOCATION_DATA_COLLECTOR, focalMethod));
 
 		focalClass.addFocalMethod(focalMethod);
 	}
@@ -61,17 +68,15 @@ public class FocalTemplateInvocationExtractor extends VoidVisitorAdapter<FocalCl
 		@Override
 		public void visit(NormalAnnotationExpr annExpr, FocalMethod focalMethod)
 		{
-			if (Utils.isDScribeAnnotation(annExpr))
-			{
-				annExpr.addPair("uut", String.format("\"%s\"", focalMethod.getSignature()));
-				var templateName = annExpr.getNameAsString();
-				Map<String, String[]> placeholders = new HashMap<>();
+			annExpr.addPair("uut", String.format("\"%s\"", focalMethod.getSignature()));
+			var templateName = annExpr.getNameAsString();
+			Map<String, String[]> placeholders = new HashMap<>();
 
-				annExpr.getChildNodes().forEach(n -> n.accept(Utils.PLACEHOLDER_COLLECTOR, placeholders));
+			annExpr.getChildNodes().forEach(n -> n.accept(Utils.PLACEHOLDER_COLLECTOR, placeholders));
 
-				var instance = new TemplateInvocation(templateName, placeholders, annExpr);
-				focalMethod.addTest(instance);
-			}
+			var instance = new TemplateInvocation(templateName, placeholders, annExpr);
+			focalMethod.addTest(instance);
 		}
 	}
+
 }

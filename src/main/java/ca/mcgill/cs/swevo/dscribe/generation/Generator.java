@@ -53,7 +53,7 @@ public abstract class Generator
 	{
 		focalTestPairs.forEach(pair -> {
 			pair.parseCompilationUnit(parser);
-			pair.extractTemplateInvocations();
+			pair.extractTemplateInvocations(templateRepo);
 			pair.validateTemplateInvocations(templateRepo);
 		});
 	}

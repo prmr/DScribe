@@ -59,11 +59,11 @@ public class FocalTestPair implements Parseable
 	/**
 	 * Extract all template invocations (i.e., DScribe Annotations) from the focal and test classes
 	 */
-	public void extractTemplateInvocations()
+	public void extractTemplateInvocations(TemplateRepository templateRepo)
 	{
 		assert focalClass.compilationUnit() != null && testClass.compilationUnit() != null;
-		var srcInstantiator = new FocalTemplateInvocationExtractor();
-		var testInstantiator = new TestTemplateInvocationExtractor();
+		var srcInstantiator = new FocalTemplateInvocationExtractor(templateRepo);
+		var testInstantiator = new TestTemplateInvocationExtractor(templateRepo);
 		srcInstantiator.visit(focalClass.compilationUnit(), focalClass);
 		testInstantiator.visit(testClass.compilationUnit(), focalClass);
 	}

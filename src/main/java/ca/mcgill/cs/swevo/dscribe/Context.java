@@ -54,7 +54,7 @@ public class Context
 	{
 	}
 
-	protected static Context instance()
+	public static Context instance()
 	{
 		return INSTANCE;
 	}
