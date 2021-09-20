@@ -8,7 +8,7 @@ import ca.mcgill.cs.swevo.dscribe.template.invocation.PlaceholderValue;
 
 public class UserMessages
 {
-	private static final String GENERATION_IS_COMPLETE = "\nFinished generating %s with %d error(s).";
+	private static final String GENERATION_IS_COMPLETE = "Finished generating %s with %d error(s).";
 	private static final String GENERATION_ERROR_OCCURRED = "%s generation error: %s : %s";
 	private static final String MISSING_FOCAL_CLASS_NAMES = "The %s command should include a space-seperated list "
 			+ "of the fully qualified \nnames of the focal classes for which to generate unit tests. For example,"
@@ -20,7 +20,7 @@ public class UserMessages
 
 	private static void printModifiedClasses(List<String> modifiedClasses)
 	{
-		modifiedClasses.stream().map(c -> String.format("\t- %s\n", c)).forEach(System.out::println);
+		modifiedClasses.stream().map(c -> String.format("\t- %s", c)).forEach(System.out::println);
 	}
 
 	public static class TestGeneration
@@ -36,11 +36,12 @@ public class UserMessages
 
 		public static void isComplete(int numErrors, List<String> modifiedTestClasses)
 		{
-			System.out.println(String.format(GENERATION_IS_COMPLETE, "unit tests", numErrors));
+			System.out.print(String.format(GENERATION_IS_COMPLETE, "unit tests", numErrors));
 			if (!modifiedTestClasses.isEmpty())
 			{
-				System.out.println("Added new unit tests in:");
+				System.out.println(" Added new unit tests in:");
 				printModifiedClasses(modifiedTestClasses);
+				System.out.println();
 			}
 
 		}
@@ -64,10 +65,10 @@ public class UserMessages
 
 		public static void isComplete(int numErrors, List<String> modifiedClasses)
 		{
-			System.out.println(String.format(GENERATION_IS_COMPLETE, "documentation", numErrors));
+			System.out.print(String.format(GENERATION_IS_COMPLETE, "documentation", numErrors));
 			if (!modifiedClasses.isEmpty())
 			{
-				System.out.println("Added documentation in:");
+				System.out.println(" Added documentation in:");
 				printModifiedClasses(modifiedClasses);
 			}
 		}
