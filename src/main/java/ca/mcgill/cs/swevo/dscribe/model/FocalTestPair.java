@@ -4,9 +4,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 
 import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
 import ca.mcgill.cs.swevo.dscribe.template.invocation.FocalTemplateInvocationExtractor;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.InstanceContext;
 import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 import ca.mcgill.cs.swevo.dscribe.template.invocation.TestTemplateInvocationExtractor;
 import ca.mcgill.cs.swevo.dscribe.utils.exceptions.GenerationException;
@@ -73,9 +75,14 @@ public class FocalTestPair implements Parseable
 		for (FocalMethod testMethod : focalClass)
 		{
 			Iterator<TemplateInvocation> iterator = testMethod.iterator();
+			CompilationUnit cu = focalClass.compilationUnit();
+			String packageName = cu.getPackageDeclaration().get().getNameAsString();
+			InstanceContext context = new InstanceContext(packageName);
 			while (iterator.hasNext())
 			{
-				if (!iterator.next().validate(templateRepository))
+				TemplateInvocation next = iterator.next();
+				next.setContext(context);
+				if (!next.validate(templateRepository))
 				{
 					iterator.remove();
 				}

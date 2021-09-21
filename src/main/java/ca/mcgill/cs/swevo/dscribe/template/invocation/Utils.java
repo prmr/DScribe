@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
+import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -59,6 +60,12 @@ public class Utils
 		public void visit(ArrayInitializerExpr arrayInitilizerExpr, List<String> values)
 		{
 			arrayInitilizerExpr.getValues().forEach(e -> e.accept(this, values));
+		}
+
+		@Override
+		public void visit(ClassExpr classExpr, List<String> values)
+		{
+			values.add(classExpr.toString());
 		}
 	}
 }

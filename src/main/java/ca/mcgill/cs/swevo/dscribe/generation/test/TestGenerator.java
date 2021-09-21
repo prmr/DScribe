@@ -21,6 +21,7 @@ import java.util.Set;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -68,7 +69,7 @@ public class TestGenerator extends Generator
 		Optional<UnitTestFactory> factory = template.getTestFactory();
 		if (factory.isPresent())
 		{
-			MethodDeclaration testMethodDecl = factory.get().create(invocation);
+			BodyDeclaration testMethodDecl = factory.get().create(invocation);
 			addTest(testClassDecl, testMethodDecl, invocation);
 			addImports(testClassCU, template);
 			moveAnnotation(focalMethodDecl, testMethodDecl, invocation.getAnnotationExpr());
@@ -86,7 +87,7 @@ public class TestGenerator extends Generator
 	 * @param annExpr
 	 *            the template invocation
 	 */
-	private void moveAnnotation(MethodDeclaration focalMethodDecl, MethodDeclaration testMethodDecl,
+	private void moveAnnotation(MethodDeclaration focalMethodDecl, BodyDeclaration testMethodDecl,
 			NormalAnnotationExpr annExpr)
 	{
 		// Remove the annotation from focal method
@@ -113,7 +114,7 @@ public class TestGenerator extends Generator
 		newImports.forEach(cu::addImport);
 	}
 
-	private void addTest(ClassOrInterfaceDeclaration testClassDecl, MethodDeclaration newTest,
+	private void addTest(ClassOrInterfaceDeclaration testClassDecl, BodyDeclaration newTest,
 			TemplateInvocation invocation)
 	{
 		if (invocation.isFromTestMethod())
