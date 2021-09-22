@@ -10,25 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  *******************************************************************************/
-package ca.mcgill.cs.swevo.dscribe.generation.test;
+package ca.mcgill.cs.swevo.dscribe.template.invocation;
 
-import com.github.javaparser.ast.body.BodyDeclaration;
-
-import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
-
-public class UnitTestFactory
+public class InstanceContext
 {
-	private final BodyDeclaration<?> prototype;
+	private final String packageName;
 
-	public UnitTestFactory(BodyDeclaration template)
+	public InstanceContext(String packageName)
 	{
-		prototype = template.clone();
+		this.packageName = packageName;
 	}
 
-	public BodyDeclaration create(TemplateInvocation instance)
+	public String getPackageName()
 	{
-		BodyDeclaration clone = prototype.clone();
-		clone.accept(new TemplateInstantiator(), instance);
-		return clone;
+		return packageName;
 	}
 }

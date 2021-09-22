@@ -1,134 +1,139 @@
 /*******************************************************************************
  * Copyright 2020 McGill University
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.generation.test;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 
-import ca.mcgill.cs.swevo.dscribe.Context;
 import ca.mcgill.cs.swevo.dscribe.generation.Generator;
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.model.FocalClass;
+import ca.mcgill.cs.swevo.dscribe.model.FocalTestPair;
+import ca.mcgill.cs.swevo.dscribe.model.TestClass;
 import ca.mcgill.cs.swevo.dscribe.template.Template;
+import ca.mcgill.cs.swevo.dscribe.template.TemplateRepository;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
-/**
- * Generates the final compilation units in order to output tests. The Test Generator performs its task without state,
- * i.e. like a function Given the correct inputs it will output the correct outputs. This idea of immutability is to
- * ensure: 1. Centralizes the responsibility of the object 2. Focus on the core function / processing 3. In turn,
- * enables decoupling the functionality, the class can be used whenever/wherever easily
- */
 public class TestGenerator extends Generator
 {
-	private Path output;
-	private Map<String, CompilationUnit> generatedTestFiles;
+	Set<String> modifiedTestClasses;
 
-	@Override
-	public List<Path> output()
+	public TestGenerator(List<FocalTestPair> focalTestPairs, TemplateRepository templateRepo)
 	{
-		List<Path> paths = new ArrayList<>();
-		for (CompilationUnit unit : generatedTestFiles.values())
-		{
-			String file = unit.getType(0).getNameAsString() + ".java";
-			paths.add(output.resolve(file));
-		}
-		return paths;
+		super(focalTestPairs, templateRepo);
+		modifiedTestClasses = new HashSet<>();
 	}
 
+	/**
+	 * Generate the unit test(s) (i.e., MethodDeclaration object) for the given template invocation. Add the unit
+	 * test(s) to the test class' compilation unit.
+	 * 
+	 * @param focalClass
+	 *            the production class that the method under test belongs to
+	 * @param focalMethodDecl
+	 *            the MethodDeclaration of the method under test
+	 * @param testClass
+	 *            the test class associated with the focal class
+	 * @param invocation
+	 *            the template invocation to generate the unit test(s) for
+	 * @param template
+	 *            the template referenced by the template invocation
+	 */
 	@Override
-	public void prepare(Context context)
+	protected void generate(FocalClass focalClass, MethodDeclaration focalMethodDecl, TestClass testClass,
+			TemplateInvocation invocation, Template template)
 	{
-		super.prepare(context);
-		output = context.testsOutputPath();
-		output.toFile().mkdirs();
-		generatedTestFiles = new HashMap<>();
-	}
-
-	@Override
-	protected void addInvocation(TemplateInstance instance, Template template)
-	{
-		CompilationUnit cu = getOrCreateCompilationUnit(instance, template);
-		ClassOrInterfaceDeclaration type = cu.getType(0).asClassOrInterfaceDeclaration();
+		var testClassCU = testClass.compilationUnit();
+		ClassOrInterfaceDeclaration testClassDecl = (ClassOrInterfaceDeclaration) testClassCU.getType(0);
 		Optional<UnitTestFactory> factory = template.getTestFactory();
 		if (factory.isPresent())
 		{
-			MethodDeclaration method = factory.get().create(instance);
-			type.addMember(method);
-			addImports(cu, template);
+			BodyDeclaration testMethodDecl = factory.get().create(invocation);
+			addTest(testClassDecl, testMethodDecl, invocation);
+			addImports(testClassCU, template);
+			moveAnnotation(focalMethodDecl, testMethodDecl, invocation.getAnnotationExpr());
+			modifiedTestClasses.add(testClass.getName());
 		}
 	}
 
-	private CompilationUnit getOrCreateCompilationUnit(TemplateInstance instance, Template template)
+	/**
+	 * Move the template invocation (i.e., DScribe annotation) from the focal method to the resulting test method
+	 * 
+	 * @param focalMethodDecl
+	 *            the declaration of the method under test
+	 * @param testMethodDecl
+	 *            the declaration of the resulting test method
+	 * @param annExpr
+	 *            the template invocation
+	 */
+	private void moveAnnotation(MethodDeclaration focalMethodDecl, BodyDeclaration testMethodDecl,
+			NormalAnnotationExpr annExpr)
 	{
-		String packName = TemplateInstantiator.resolveName(template.getPackageName(), instance);
-		String className = TemplateInstantiator.resolveName(template.getClassName(), instance);
-		String key = packName + "." + className;
-		if (generatedTestFiles.containsKey(key))
-		{
-			return generatedTestFiles.get(key);
-		}
-		CompilationUnit cu = new CompilationUnit();
-		if (!packName.isEmpty())
-		{
-			cu.setPackageDeclaration(packName);
-		}
-		cu.addClass(className);
-		generatedTestFiles.put(key, cu);
-		return cu;
+		// Remove the annotation from focal method
+		NodeList<AnnotationExpr> focalAnnotations = focalMethodDecl.getAnnotations();
+		focalAnnotations.remove(annExpr);
+		focalMethodDecl.setAnnotations(new NodeList<>(focalAnnotations));
+
+		// Add the annotation to test method
+		testMethodDecl.addAnnotation(annExpr);
 	}
 
+	/**
+	 * Add the necessary import statements to the test class' compilation unit
+	 * 
+	 * @param cu
+	 *            the compilation unit of the test class for which unit test(s) have been generated
+	 * @param template
+	 *            the template used to generate unit tests
+	 */
 	private void addImports(CompilationUnit cu, Template template)
 	{
 		List<ImportDeclaration> newImports = new ArrayList<>(template.getNecessaryImports());
 		newImports.removeAll(cu.getImports());
-		for (ImportDeclaration newImport : newImports)
+		newImports.forEach(cu::addImport);
+	}
+
+	private void addTest(ClassOrInterfaceDeclaration testClassDecl, BodyDeclaration newTest,
+			TemplateInvocation invocation)
+	{
+		if (invocation.isFromTestMethod())
 		{
-			cu.addImport(newImport);
+			MethodDeclaration oldTest = invocation.getOldTestMethod();
+			testClassDecl.remove(oldTest);
 		}
+		testClassDecl.addMember(newTest);
 	}
 
 	@Override
-	public List<Exception> generate()
+	protected void preGenerate()
 	{
-		List<Exception> exceptions = new ArrayList<>();
-		for (CompilationUnit finalTestCu : generatedTestFiles.values())
-		{
-			String className = finalTestCu.getType(0).getNameAsString();
-			try (BufferedWriter fileWriter = Files.newBufferedWriter(output.resolve(className + ".java"), UTF_8))
-			{
-				fileWriter.write(finalTestCu.toString());
-				System.out.println("Successfully generated tests for " + className + ".java");
-			}
-			catch (IOException exception)
-			{
-				exceptions.add(exception);
-			}
-		}
-		return exceptions;
+		modifiedTestClasses.clear();
+	}
+
+	@Override
+	protected List<String> postGenerate()
+	{
+		return new ArrayList<>(modifiedTestClasses);
 	}
 }

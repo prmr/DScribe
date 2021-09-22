@@ -11,21 +11,37 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
-package ca.mcgill.cs.swevo.dscribe.utils.exceptions;
+package ca.mcgill.cs.swevo.dscribe.template.invocation;
 
-public class InvocationException extends RuntimeException {
-  /** Automatically generated */
-  private static final long serialVersionUID = -2588400211554024832L;
+import java.util.Collections;
+import java.util.List;
 
-  public InvocationException(InvocationError error) {
-    this(error, null);
+public class PlaceholderValue {
+  private List<String> value;
+
+  public PlaceholderValue(String... values) {
+    this.value = List.of(values);
   }
 
-  public InvocationException(InvocationError error, Throwable cause) {
-    super("Template invocation error due to " + error.name(), cause);
+  public boolean isList() {
+    return value.size() != 1;
   }
 
-  public static enum InvocationError {
-    EXTERNAL_IO, BAD_FORMAT
+  public String getValue() {
+    assert value.size() == 1;
+    return value.get(0);
+  }
+
+  public List<String> getValueAsList() {
+    return Collections.unmodifiableList(value);
+  }
+
+  @Override
+  public String toString() {
+    if (isList()) {
+      return value.toString();
+    } else {
+      return getValue();
+    }
   }
 }

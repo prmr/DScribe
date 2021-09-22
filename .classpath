@@ -7,10 +7,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
-	<classpathentry kind="lib" path="libs/gson-2.8.6.jar"/>
 	<classpathentry kind="lib" path="libs/javaparser-core-3.15.9.jar"/>
 	<classpathentry kind="lib" path="libs/javaparser-symbol-solver-core-3.15.9.jar"/>
 	<classpathentry kind="lib" path="libs/javaparser-symbol-solver-model-3.15.9.jar"/>
 	<classpathentry kind="lib" path="libs/javaparser-symbol-solver-logic-3.15.9.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JetUML"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
