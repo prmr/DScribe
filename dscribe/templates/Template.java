@@ -6,27 +6,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class Template 
-{	
+public class Template {	
 	/**
-	 * Throws $exType$ when $state$
+	 * Throws $exType$ when $state$.
 	 */
 	@Template("AssertThrows")
 	@Types($state$=EXPR, $exType$=EXCEPTION, $factory$=EXPR, $params$=EXPR_LIST)
 	@Test
-	public void $method$_When$state$_Throw$exType$()
-	{
-		assertThrows($exType$, () -> $factory$.$method$($params$)); 
+	public void $method$_When$state$_Throw$exType$() {
+	    assertThrows($exType$, () -> $factory$.$method$($params$)); 
 	}
 	
 	/**
-	 * Throws $exType$ when $state$
+	 * Throws $exType$ when $state$.
 	 */
 	@Template("AssertThrowsMessage")
 	@Types($state$=EXPR, $exType$=EXCEPTION, $factory$=EXPR, $params$=EXPR_LIST, $message$=EXPR)
 	@Test
-	public void $method$_When$state$_Throw$exType$()
-	{
+	public void $method$_When$state$_Throw$exType$() {
 		final Exception thrown = assertThrows($exType$, () -> $factory$.$method$($params$));
         assertEquals($message$, thrown.getMessage());
 	}
@@ -35,24 +32,32 @@ public class Template
 	 * Performs a shallow copy of the object.
 	 */
 	@Template("ShallowClone")
-    @Types($factory$=EXPR)
-    @Test
-    public void clone_ReturnShallowCopy() {
+	@Types($factory$=EXPR)
+	@Test
+	public void clone_ReturnShallowCopy() {
 		$class$ initial = $factory$;
 		$class$ cloned = initial.$method$();
 		assertNotSame(initial, cloned);
 		assertEquals(initial, cloned);
-    }	
+	}	
 
-	/** Returns $bool$ when $state$ */
+	/** Returns $bool$ when $state$. */
 	@Template("AssertBool")
 	@Types($state$=EXPR, $bool$=EXPR, $factory$=EXPR, $params$=EXPR_LIST)
 	@Test
 	public void $method$_When$state$_Return$bool$() {
-		boolean actual = $factory$.$method$($params$); 
-	    assert$bool$(actual);
+		boolean actual = $factory$.$method$($params$);
+		assert$bool$(actual);
 	}
-		
+	
+	/** Returns $expected$ when input is null. */
+	@Template("NullParam")
+	@Types($factory$=EXPR, $expected$=EXPR)
+	@Test
+	public void $method$_WhenInputIsNull_Return$expected$() {
+		boolean actual = $factory$.$method$(null);
+		assertEquals(expected, actual);
+	}
 	
 	@Template("EqualsContract")
 	@Types($factory1$=EXPR, $factory2$=EXPR, $factory3$=EXPR)
