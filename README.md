@@ -6,16 +6,13 @@ DScribe is a technique to generate both unit tests and documentation from a set 
 
 The content of this repository is licensed unter the terms of the [Apache license, Version 2.0](LICENSE). To indicate attribution, please link to this repository and cite the following technical report:
 
-Mathieu Nassif, Alexa Hernandez, Ashvitha Sridharan, and Martin P. Robillard.
-Generating Unit Tests for Documentation.
-ArXiv preprint [arXiv:2005.08750](https://arxiv.org/abs/2005.08750), 12 pages.
-18 May 2020.
+M. Nassif, A. Hernandez, A. Sridharan and M. P. Robillard, "Generating Unit Tests for Documentation," To appear in IEEE Transactions on Software Engineering, doi: [10.1109/TSE.2021.3087087](10.1109/TSE.2021.3087087).
 
 ## How DScribe Works
-DScribe allows users to create joint templates for unit tests and documentation that capture the structure to test and document a recurring concern. Tester can then invoke the joint templates to generate consistent and checkable unit tests and documentation.
+DScribe allows developers to create templates that jointly capture the structure to test and document a recurring concern. Developers can then invoke the templates to generate consistent and checkable unit tests and documentation.
 
 ### Writing Templates 
-DScribe templates are defined in Java and combine two sub-templates, one for the unit test(s), the other for the documentation. The unit test sub-template is a code skeleton that is created as an abstract syntax tree with a set of nodes marked as placeholders (denoted by surrounding "$" signs). The documentation sub-template consists of a JavaDoc comment that may refer to the placeholders defined in the unit test sub-template. For example:
+DScribe templates are defined in Java. They associate two components: a code skeleton and a documentation fragment. The code skeleton is created as an abstract syntax tree with a set of nodes marked as placeholders (denoted by surrounding "$" signs). It captures the structure to test the concern. The documentation fragmentation describes the concern under test using free-form text and may refer to the code skeleton's placeholders. For example:
 ```
 /**										 
  * Throws $exType$ when $state$			  	
@@ -63,10 +60,13 @@ public int divide(int x, int y) {
 You do not need to pass values for the `$method$` and `$class$` placeholders. They are predefined placeholders, their values are derived directly from the focal method and its declaring class.
 
 ## Installing DScribe
+There are different ways to run DScribe&mdash;as an Eclipse project, as a jar file, or using the more user-friendly DScribe Eclipse plug-in. 
 
-**Using Eclipse:** You can import this repository as an Eclipse project, and run it with a recent Java version (>= 11).
+**Eclipse Project:** You can import this repository as an Eclipse project, and run it with a recent Java version (>= 11).
 
 **Compiling sources:** All source files are in the `src/main/java` folder, and dependencies are distributed in the `libs` folder.
+
+**Eclipse Plug-in:** To learn how to install and use the DScribe Eclipse plug-in, checkout the [plug-in's README](https://github.com/prmr/DScribe-plugin). 
 
 ## Configuring DScribe
 To use DScribe, add the following files to your project:
@@ -87,7 +87,10 @@ The `config.properties`can define the following properties:
 Look [here](https://github.com/prmr/DScribe/blob/master/dscribe/config.properties) for an example `config.properties` file! 
 
 ## Running DScribe
+### Using the DScribe Eclipse Plug-in 
+The DScribe Eclipse plug-in's [README](https://github.com/prmr/DScribe-plugin) explains how you can use it to run DScribe.
 
+### Using an Eclipse Project or Jar File 
 The entry point of DScribe is the `main` method in `ca.mcgill.cs.swevo.dscribe.DScribe`. Use command line arguments to specify which operation you want to perform, among the following:
 
 - `generateTests`: This operation generates unit tests for all template invocations (e.g., method-level Java annotations) in the inputted focal class(es). When a unit test is generated, it is added to the test class associated with the focal method's declaring type. The template invocation is moved from the focal method to the resulting test method.
@@ -105,7 +108,6 @@ The entry point of DScribe is the `main` method in `ca.mcgill.cs.swevo.dscribe.D
   ```
   java -cp libs/*.jar:bin:your/project ca.mcgill.cs.swevo.dscribe.DScribe generateDocs com.mypackage.MyClass1
   ```
-
 
 ## Dependencies
 
