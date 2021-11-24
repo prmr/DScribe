@@ -6,7 +6,7 @@ DScribe is a technique to generate both unit tests and documentation from a set 
 
 The content of this repository is licensed unter the terms of the [Apache license, Version 2.0](LICENSE). To indicate attribution, please link to this repository and cite the following technical report:
 
-M. Nassif, A. Hernandez, A. Sridharan and M. P. Robillard, "Generating Unit Tests for Documentation," To appear in IEEE Transactions on Software Engineering, doi: [10.1109/TSE.2021.3087087](10.1109/TSE.2021.3087087).
+Mathieu Nassif, Alexa Hernandez, Ashvitha Sridharan, and Martin P. Robillard. "Generating Unit Tests for Documentation," To appear in IEEE Transactions on Software Engineering, doi: [10.1109/TSE.2021.3087087](10.1109/TSE.2021.3087087).
 
 ## How DScribe Works
 DScribe allows developers to create templates that jointly capture the structure to test and document a recurring concern. Developers can then invoke the templates to generate consistent and checkable unit tests and documentation.
@@ -46,7 +46,9 @@ public @interface AssertThrowsList
 	AssertThrows[] value();
 }
 ```
-For more examples, check out these [templates](https://github.com/prmr/DScribe/blob/master/dscribe/templates/Template.java) and their corresponding [annotations](https://github.com/prmr/DScribe/blob/annotations/dscribe/DScribeAnnotations.java)!
+
+### Predefined Templates
+To help developers get started using DScribe, we provide a set of [six predefined templates](https://github.com/prmr/DScribe/blob/master/dscribe/templates/Template.java) that capture well-known universal specification such as specfications about exceptions, clones contracts, and equals contracts. We also provide the corresponding [annotation definitions](https://github.com/prmr/DScribe/blob/annotations/dscribe/DScribeAnnotations.java) for each of the predefined templates.
 	
 ### Invoking Templates
 To invoke a template, you annotate the focal method with the annotation corresponding to the template. For example, to use the `AssertThrows` template to test and document the method `int divide(int x, int y)`, simply annotate the method with the `AssertThrows` annotation and pass the template's placeholder values as input to the annotation. 
