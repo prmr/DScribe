@@ -1,17 +1,14 @@
 /*******************************************************************************
  * Copyright 2020 McGill University
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.generation.test;
 
@@ -32,20 +29,19 @@ import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 
-import ca.mcgill.cs.swevo.dscribe.instance.PlaceholderValue;
-import ca.mcgill.cs.swevo.dscribe.instance.TemplateInstance;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
 /**
  * Visits all the nodes of the scaffold focal method. If a $---$ pattern is found: 1. Check if a matching element name
  * is found for the template. 2. Check the type of the template element based on the source code. 3. Cross-check to
  * validate and substitute if types align.
  */
-public class TemplateInstantiator extends ModifierVisitor<TemplateInstance>
+public class TemplateInstantiator extends ModifierVisitor<TemplateInvocation>
 {
-	private static final Pattern PATTERN = Pattern.compile("\\$.*?\\$");
+	private static final Pattern PATTERN = Pattern.compile("\\$[^\\$]*?\\$");
 
 	@Override
-	public Visitable visit(EmptyStmt n, TemplateInstance arg)
+	public Visitable visit(EmptyStmt n, TemplateInvocation arg)
 	{
 		Optional<Node> parentNode = n.getParentNode();
 		if (parentNode.isEmpty())
@@ -62,13 +58,13 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInstance>
 	}
 
 	@Override
-	public Node visit(SimpleName md, TemplateInstance template)
+	public Node visit(SimpleName md, TemplateInvocation template)
 	{
 		super.visit(md, template);
-		Matcher m = PATTERN.matcher(md.getIdentifier());
-		if (m.matches())
+		Matcher matcher = PATTERN.matcher(md.getIdentifier());
+		if (matcher.matches())
 		{
-			String newName = replaceWholeNode(m.group(), template);
+			String newName = replaceWholeNode(matcher.group(), template);
 			if (newName.isEmpty())
 			{
 				return null;
@@ -78,19 +74,19 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInstance>
 		}
 		else
 		{
-			m.reset();
-			String newName = replaceInnerMatches(m, template);
+			matcher.reset();
+			String newName = replaceInnerMatches(matcher, template);
 			md.setIdentifier(newName);
 			return md;
 		}
 	}
 
-	private static String replaceWholeNode(String identifier, TemplateInstance template)
+	private static String replaceWholeNode(String identifier, TemplateInvocation template)
 	{
 		String name = identifier;
 		if (template.containsPlaceholder(name))
 		{
-			PlaceholderValue value = template.getPlaceholderValue(name);
+			var value = template.getPlaceholderValue(name);
 			if (value.isList())
 			{
 				return value.getValueAsList().stream().collect(Collectors.joining(", "));
@@ -103,15 +99,15 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInstance>
 		return name;
 	}
 
-	private static String replaceInnerMatches(Matcher m, TemplateInstance template)
+	private static String replaceInnerMatches(Matcher matcher, TemplateInvocation template)
 	{
-		StringBuffer sb = new StringBuffer();
-		while (m.find())
+		var sb = new StringBuffer();
+		while (matcher.find())
 		{
-			String name = m.group();
+			String name = matcher.group();
 			if (template.containsPlaceholder(name))
 			{
-				PlaceholderValue value = template.getPlaceholderValue(m.group());
+				var value = template.getPlaceholderValue(matcher.group());
 				if (value.isList())
 				{
 					throw new IllegalArgumentException("List placeholder used inside an identifier");
@@ -123,24 +119,33 @@ public class TemplateInstantiator extends ModifierVisitor<TemplateInstance>
 					{
 						replacement = replacement.substring(4);
 					}
+					else if (replacement.endsWith(".class"))
+					{
+						replacement = replacement.replace(".class", "");
+						int simpleNameStart = replacement.lastIndexOf(".");
+						if (simpleNameStart > 0)
+						{
+							replacement = replacement.substring(simpleNameStart + 1);
+						}
+					}
 					replacement = Matcher.quoteReplacement(replacement);
-					m.appendReplacement(sb, replacement);
+					matcher.appendReplacement(sb, replacement);
 				}
 			}
 			else
 			{
 				throw new IllegalArgumentException(
-						"Invalid placeholder name '" + name + "' for template " + template.getName());
+						"Invalid placeholder name '" + name + "' for template " + template.getTemplateName());
 			}
 		}
 		// Perform the node string replacement.
-		m.appendTail(sb);
+		matcher.appendTail(sb);
 		return sb.toString();
 	}
 
-	public static String resolveName(String name, TemplateInstance instance)
+	public static String resolveName(String name, TemplateInvocation instance)
 	{
-		Matcher m = PATTERN.matcher(name);
-		return replaceInnerMatches(m, instance);
+		Matcher matcher = PATTERN.matcher(name);
+		return replaceInnerMatches(matcher, instance);
 	}
 }

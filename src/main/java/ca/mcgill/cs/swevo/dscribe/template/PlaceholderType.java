@@ -1,17 +1,14 @@
 /*******************************************************************************
  * Copyright 2020 McGill University
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.template;
 
@@ -23,8 +20,8 @@ import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.Name;
 
-import ca.mcgill.cs.swevo.dscribe.instance.InstanceContext;
-import ca.mcgill.cs.swevo.dscribe.instance.PlaceholderValue;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.InstanceContext;
+import ca.mcgill.cs.swevo.dscribe.template.invocation.PlaceholderValue;
 import ca.mcgill.cs.swevo.dscribe.utils.TypeNameResolver;
 
 public enum PlaceholderType
@@ -72,6 +69,7 @@ public enum PlaceholderType
 	{
 		try
 		{
+			System.out.println(value);
 			TypeNameResolver.resolve(value);
 			return true;
 		}
@@ -101,7 +99,7 @@ public enum PlaceholderType
 			return false;
 		}
 	}
-	
+
 	private static boolean isMethod(String value)
 	{
 		if (value.equals("new"))
@@ -117,14 +115,14 @@ public enum PlaceholderType
 
 	private static boolean isIdentifier(String value)
 	{
-		JavaParser parser = new JavaParser();
+		var parser = new JavaParser();
 		ParseResult<Name> res = parser.parseName(value);
 		return res.isSuccessful();
 	}
 
 	private static boolean isExpr(String value)
 	{
-		JavaParser parser = new JavaParser();
+		var parser = new JavaParser();
 		ParseResult<Expression> res = parser.parseExpression(value);
 		return res.isSuccessful();
 	}

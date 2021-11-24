@@ -1,17 +1,14 @@
 /*******************************************************************************
  * Copyright 2020 McGill University
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  *******************************************************************************/
 package ca.mcgill.cs.swevo.dscribe.template;
 
@@ -24,6 +21,7 @@ import java.util.function.Consumer;
 
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -68,15 +66,30 @@ public class TemplateFileParser extends VoidVisitorAdapter<List<ImportDeclaratio
 	}
 
 	@Override
-	public void visit(ClassOrInterfaceDeclaration n, List<ImportDeclaration> arg)
+	public void visit(ClassOrInterfaceDeclaration n, List<ImportDeclaration> imports)
 	{
-		if (className != null)
+		ClassOrInterfaceDeclaration classDecl = n.clone();
+		String templateName = templateName(classDecl);
+		List<Placeholder> types = templatePlaceholders(classDecl);
+		DocumentationFactory docFactory = null;
+		if (classDecl.hasJavaDocComment())
 		{
-			System.out.println("TEMPLATE FILE ERROR: Template file cannot contain nested classes or interfacse.");
-			return;
+			Javadoc javadoc = classDecl.getJavadoc().get();
+			docFactory = new DocumentationFactory(javadoc.getDescription().toText());
+			classDecl.removeJavaDocComment();
 		}
+		UnitTestFactory testFactory = null;
+		UnitTestMatcher matcher = null;
+		if (!classDecl.isAbstract())
+		{
+			testFactory = new UnitTestFactory(classDecl);
+			matcher = new UnitTestMatcher(templateName, packageName, className, classDecl);
+		}
+		Template scaffoldTemplateMethod = new Template(templateName, className, packageName, testFactory, docFactory,
+				matcher, types, imports);
+		add.accept(scaffoldTemplateMethod);
 		className = n.getNameAsString();
-		super.visit(n, arg);
+		super.visit(n, imports);
 	}
 
 	/**
@@ -88,35 +101,38 @@ public class TemplateFileParser extends VoidVisitorAdapter<List<ImportDeclaratio
 	{
 		MethodDeclaration method = c.clone();
 		String templateName = templateName(method);
-		List<Placeholder> types = templatePlaceholders(method);
-		DocumentationFactory docFactory = null;
-		if (method.hasJavaDocComment())
+		if (templateName != null)
 		{
-			Javadoc javadoc = method.getJavadoc().get();
-			docFactory = new DocumentationFactory(javadoc.getDescription().toText());
-			method.removeJavaDocComment();
+			List<Placeholder> types = templatePlaceholders(method);
+			DocumentationFactory docFactory = null;
+			if (method.hasJavaDocComment())
+			{
+				Javadoc javadoc = method.getJavadoc().get();
+				docFactory = new DocumentationFactory(javadoc.getDescription().toText());
+				method.removeJavaDocComment();
+			}
+			UnitTestFactory testFactory = null;
+			UnitTestMatcher matcher = null;
+			if (!method.isAbstract())
+			{
+				testFactory = new UnitTestFactory(method);
+				matcher = new UnitTestMatcher(templateName, packageName, className, method);
+			}
+			Template scaffoldTemplateMethod = new Template(templateName, className, packageName, testFactory,
+					docFactory, matcher, types, imports);
+			add.accept(scaffoldTemplateMethod);
 		}
-		UnitTestFactory testFactory = null;
-		UnitTestMatcher matcher = null;
-		if (!method.isAbstract())
-		{
-			testFactory = new UnitTestFactory(method);
-			matcher = new UnitTestMatcher(templateName, packageName, className, method);
-		}
-		Template scaffoldTemplateMethod = new Template(templateName, className, packageName, testFactory, docFactory,
-				matcher, types, imports);
-		add.accept(scaffoldTemplateMethod);
 	}
 
-	private String templateName(MethodDeclaration method)
+	private String templateName(BodyDeclaration declaration)
 	{
-		Optional<AnnotationExpr> templateName = method.getAnnotationByName("Template");
+		Optional<AnnotationExpr> templateName = declaration.getAnnotationByName("Template");
 		if (!templateName.isPresent())
 		{
-			throw new RepositoryException(BAD_TEMPLATE);
+			return null;
 		}
 		AnnotationExpr annotation = templateName.get();
-		method.remove(annotation);
+		declaration.remove(annotation);
 		if (!annotation.isSingleMemberAnnotationExpr())
 		{
 			throw new RepositoryException(BAD_TEMPLATE);
@@ -129,9 +145,9 @@ public class TemplateFileParser extends VoidVisitorAdapter<List<ImportDeclaratio
 		return annotationValue.asStringLiteralExpr().asString();
 	}
 
-	private List<Placeholder> templatePlaceholders(MethodDeclaration method)
+	private List<Placeholder> templatePlaceholders(BodyDeclaration declaration)
 	{
-		Optional<AnnotationExpr> typesAnnotationOpt = method.getAnnotationByName("Types");
+		Optional<AnnotationExpr> typesAnnotationOpt = declaration.getAnnotationByName("Types");
 		if (typesAnnotationOpt.isEmpty())
 		{
 			return List.of();
@@ -156,7 +172,7 @@ public class TemplateFileParser extends VoidVisitorAdapter<List<ImportDeclaratio
 				throw new RepositoryException(BAD_TEMPLATE, e);
 			}
 		}
-		method.remove(typesAnnotation);
+		declaration.remove(typesAnnotation);
 		return types;
 	}
 }
