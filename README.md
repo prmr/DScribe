@@ -47,6 +47,20 @@ public @interface AssertThrowsList
 }
 ```
 
+DScribe templates are typically aggregated in a template class called ``Template.java``. You can also decide to organize your templates across multiple template classes. The imports statements and package declaration defined in your template class(es) are copied over to the generated test classes. For example, suppose your ``Template.java`` class looks like:
+```
+package $package$;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class Template {
+	// Template definitions
+		.
+		.
+		.
+}
+```
+Then the generated test classes will have a package name that is the same as the focal class' package name. The ``import static org.junit.jupiter.api.Assertions.*`` import statement will also be added to the test classes. 
+
 ### Predefined Templates
 To help developers get started using DScribe, we provide a set of [six predefined templates](https://github.com/prmr/DScribe/blob/master/dscribe/templates/Template.java) that capture well-known universal specification such as specfications about exceptions, clones contracts, and equals contracts. We also provide the corresponding [annotation definitions](https://github.com/prmr/DScribe/blob/annotations/dscribe/DScribeAnnotations.java) for each of the predefined templates.
 	
