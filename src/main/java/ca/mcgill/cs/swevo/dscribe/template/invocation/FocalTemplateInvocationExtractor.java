@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -68,7 +69,18 @@ public class FocalTemplateInvocationExtractor extends VoidVisitorAdapter<FocalCl
 		@Override
 		public void visit(NormalAnnotationExpr annExpr, FocalMethod focalMethod)
 		{
-			annExpr.addPair("uut", String.format("\"%s\"", focalMethod.getSignature()));
+			boolean addUUT = true;
+			for (MemberValuePair pair : annExpr.findAll(MemberValuePair.class)) 
+			{
+				if (pair.getNameAsString() == "uut") 
+				{
+					addUUT = false;
+				}
+			}
+			if (addUUT) 
+			{
+				annExpr.addPair("uut", String.format("\"%s\"", focalMethod.getSignature()));
+			}
 			var templateName = annExpr.getNameAsString();
 			Map<String, String[]> placeholders = new HashMap<>();
 
