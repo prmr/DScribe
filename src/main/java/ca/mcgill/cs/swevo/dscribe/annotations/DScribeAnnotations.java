@@ -5,60 +5,65 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Arrays;
-import java.util.List;
 
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.AssertBool;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.AssertBoolList;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.AssertThrows;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.AssertThrowsList;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.AssertThrowsMessage;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.AssertThrowsMessageList;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.EqualsContract;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.EqualsContractList;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.ShallowClone;
-import ca.mcgill.cs.jetuml.annotations.DScribeAnnotations.ShallowCloneList;
-
-public class DScribeAnnotations
-{
+public class DScribeAnnotations {
+	
 	// AssertThrows Template
 	@Repeatable(AssertThrowsList.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface AssertThrows
-	{
+	public @interface AssertThrows {
 		public String state();
-		public Class<?> exType();
+
+		Class<?> exType();
+
 		public String factory();
+
 		public String[] params() default {};
+
 		public String uut() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface AssertThrowsList
-	{
+	public @interface AssertThrowsList {
 		AssertThrows[] value();
+	}
+	
+	//ReturnNull Template
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE, ElementType.METHOD })
+	public @interface ReturnNull {
+		String factory();
+		
+		String[] params();
+		
+		String state();
+		
+		public String uut() default "";
 	}
 
 	// AssertThrowsMessage Template
 	@Repeatable(AssertThrowsMessageList.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface AssertThrowsMessage
-	{
+	public @interface AssertThrowsMessage {
 		public String state();
+
 		public Class<?> exType();
+
 		public String factory();
+
 		public String[] params() default {};
+
 		public String message();
+
 		public String uut() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface AssertThrowsMessageList
-	{
+	public @interface AssertThrowsMessageList {
 		AssertThrowsMessage[] value();
 	}
 
@@ -66,16 +71,15 @@ public class DScribeAnnotations
 	@Repeatable(ShallowCloneList.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface ShallowClone
-	{
+	public @interface ShallowClone {
 		public String factory();
+
 		public String uut() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface ShallowCloneList
-	{
+	public @interface ShallowCloneList {
 		ShallowClone[] value();
 	}
 
@@ -83,19 +87,21 @@ public class DScribeAnnotations
 	@Repeatable(AssertBoolList.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface AssertBool
-	{
+	public @interface AssertBool {
 		public String state();
+
 		public String bool();
+
 		public String factory();
+
 		public String[] params() default {};
+
 		public String uut() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface AssertBoolList
-	{
+	public @interface AssertBoolList {
 		AssertBool[] value();
 	}
 
@@ -103,18 +109,61 @@ public class DScribeAnnotations
 	@Repeatable(EqualsContractList.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface EqualsContract
-	{
+	public @interface EqualsContract {
 		public String factory1();
+
 		public String factory2();
+
 		public String factory3();
+
 		public String uut() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE, ElementType.METHOD })
-	public @interface EqualsContractList
-	{
+	public @interface EqualsContractList {
 		EqualsContract[] value();
 	}
+	
+	//ToString Template
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	public @interface ToString {
+		public String factory();
+		
+		public String target();
+		
+		public String uut() default "";
+	}
+	
+	//AssertBools Template
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	public @interface AssertBools {
+		public String factory();
+		
+		public String trueState();
+		
+		public String falseState();
+		
+		public String[] trueParams();
+		
+		public String[] falseParams();
+		
+		public String uut() default "";
+	}
+	
+	//NullParam Template
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	public @interface NullParam {
+		public String factory();
+		
+		public String expected();
+		
+		public String returnClass();
+
+		public String uut() default "";
+	}
+	
 }
