@@ -50,6 +50,19 @@ public class Template {
 		assert$bool$(actual);
 	}
 	
+	/**
+	 * Returns true when $trueState$, false when $falseState$
+	 */
+	@Template("AssertBools")
+	@Types($trueState$=EXPR, $falseState$=EXPR, $factory$=EXPR, $trueParams$=EXPR_LIST, $falseParams$=EXPR_LIST)
+	@Test
+	public void $method$_When$trueState$ReturnTrueWhen$falseState$ReturnFalse() {
+		boolean actual = $factory$.$method$($trueParams$);
+		boolean fOracle = $factory$.$method$($falseParams$);
+		assertTrue(actual);
+		assertFalse(fOracle);
+	}
+	
 	/** Returns $expected$ when input is null. */
 	@Template("NullParam")
 	@Types($factory$=EXPR, $expected$=EXPR)
