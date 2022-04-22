@@ -22,7 +22,6 @@ import ca.mcgill.cs.swevo.dscribe.template.invocation.TemplateInvocation;
 
 public class TestTemplateInstantiator 
 {
-	
 	static FocalTestPair setup(String className, String testClassName, String targetFolder)
 	{
 		Path pathToClass = null;
@@ -43,11 +42,12 @@ public class TestTemplateInstantiator
 		return pair;
 	}
 	
+	private FocalTestPair pair = setup("top.MinimalUsage", "top.TestMinimalUsage", "testdata");
+	
 	@Test
 	void test_TemplateInstatiator_ParseWholeExpression() 
 	{
 		//setup the template invocation data
-		FocalTestPair pair = setup("top.MinimalUsage", "top.TestMinimalUsage", "testdata");
 		SimpleName statement = new SimpleName("$factory$");
 		for (FocalMethod method : pair.focalClass()) {
 			for (TemplateInvocation invocation : method) {
@@ -60,7 +60,6 @@ public class TestTemplateInstantiator
 	@Test
 	void test_TemplateInstantiator_ParseWithinIdentifier() 
 	{
-		FocalTestPair pair = setup("top.MinimalUsage", "top.TestMinimalUsage", "testdata");
 		SimpleName statement = new SimpleName("When_$trueState$");
 		for (FocalMethod method : pair.focalClass()) {
 			for (TemplateInvocation invocation : method) {
@@ -73,7 +72,6 @@ public class TestTemplateInstantiator
 	@Test
 	void test_TemplateInstantiator_ThrowsExceptionWhenListTypeIsUsedInIdentifier() 
 	{
-		FocalTestPair pair = setup("top.MinimalUsage", "top.TestMinimalUsage", "testdata");
 		SimpleName statement = new SimpleName("When_$trueParams$");
 		for (FocalMethod method : pair.focalClass()) {
 			for (TemplateInvocation invocation : method) {
@@ -85,7 +83,6 @@ public class TestTemplateInstantiator
 	@Test
 	void test_TemplateInstantiator_IgnoresIdentifierThatDoesNotExistInInvocation() 
 	{
-		FocalTestPair pair = setup("top.MinimalUsage", "top.TestMinimalUsage", "testdata");
 		SimpleName statement = new SimpleName("$params$");
 		for (FocalMethod method : pair.focalClass()) {
 			for (TemplateInvocation invocation : method) {
@@ -97,7 +94,6 @@ public class TestTemplateInstantiator
 	
 	@Test
 	void test_TemplateInstantiator_ReturnsCommaSeperatedStringWhenExpressionIsList() {
-		FocalTestPair pair = setup("top.MinimalUsage", "top.TestMinimalUsage", "testdata");
 		SimpleName expression = new SimpleName("$falseParams$");
 		for (FocalMethod method : pair.focalClass()) {
 			for (TemplateInvocation invocation : method) {
@@ -110,7 +106,6 @@ public class TestTemplateInstantiator
 	@Test
 	void test_TemplateInstantiator_ThrowsExceptionWhenInvalidPlaceholder() 
 	{
-		FocalTestPair pair = setup("top.MinimalUsage", "top.TestMinimalUsage", "testdata");
 		SimpleName statement = new SimpleName("When_$invalidplaceholder$");
 		for (FocalMethod method : pair.focalClass()) {
 			for (TemplateInvocation invocation : method) {
@@ -122,7 +117,7 @@ public class TestTemplateInstantiator
 	@Test
 	void test_TemplateInstantiator_ReturnsNullWhenEmptyPlaceholderValue()
 	{
-		FocalTestPair pair = setup("top.HasNestedClass", "top.TestHasNestedClass", "testdata");
+		pair = setup("top.HasNestedClass", "top.TestHasNestedClass", "testdata");
 		SimpleName statement = new SimpleName("$target$");
 		for (FocalMethod method : pair.focalClass()) {
 			if (method.getSignature().equals("stringize()")) {
@@ -140,7 +135,7 @@ public class TestTemplateInstantiator
 	@Test
 	void test_TemplateInstantiator_ReplacesnewKeywordWhenUsedInIdentifier() 
 	{
-		FocalTestPair pair = setup("top.HasNestedClass", "top.TestHasNestedClass", "testdata");
+		pair = setup("top.HasNestedClass", "top.TestHasNestedClass", "testdata");
 		SimpleName statement = new SimpleName("has_$factory$");
 		for (FocalMethod method : pair.focalClass()) {
 			if (method.getSignature().equals("divides(int,int)")) {			
@@ -155,7 +150,7 @@ public class TestTemplateInstantiator
 	@Test
 	void test_TemplateInstantiator_TrimsPlaceholderValueWithClassTypeWhenUsedInIdentifier()
 	{
-		FocalTestPair pair = setup("top.HasNestedClass", "top.TestHasNestedClass", "testdata");
+		pair = setup("top.HasNestedClass", "top.TestHasNestedClass", "testdata");
 		SimpleName statement = new SimpleName("with_$exType$");
 		for (FocalMethod method : pair.focalClass()) {
 			if (method.getSignature().equals("throwsWhen(String)")) {			
