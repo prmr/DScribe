@@ -109,7 +109,7 @@ public abstract class Generator
 	 * @param focalMethod
 	 *            the method under test
 	 */
-	private void addDefaultPlaceholders(TemplateInvocation invocation, FocalClass focalClass, FocalMethod focalMethod)
+	private static void addDefaultPlaceholders(TemplateInvocation invocation, FocalClass focalClass, FocalMethod focalMethod)
 	{
 		invocation.addPlaceholder("$package$", focalClass.getPackageName());
 		String className = focalClass.getSimpleName();

@@ -87,7 +87,7 @@ public class TestFocalTemplateInvocationExtractor {
 		focalClass = new FocalClass(path);
 	}
 
-	private static String annotationString = "@AssertBools(factory = \"MinimalUsage\", falseParams = { \"22\" }, falseState = \"IsEven\", trueParams = { \"23\" }, trueState = \"IsOdd\", uut = \"isOdd(int)\")";
+	private static String annotationString = "@AssertBools(factory = \"MinimalUsage\", falseParams = { \"22\", \"0\" }, falseState = \"IsEven\", trueParams = { \"23\", \"0\" }, trueState = \"IsOdd\", uut = \"isOdd(int,int)\")";
 
 	@Test
 	void test_invocationExtractor_FindsAllTemplateInvocations() throws FileNotFoundException 
@@ -114,7 +114,7 @@ public class TestFocalTemplateInvocationExtractor {
 			foundMethods.add(method.getSignature());
 		}
 		List<String> oracle = new ArrayList<String>();
-		oracle.add("isOdd(int)");
+		oracle.add("isOdd(int,int)");
 		assertEquals(new HashSet<String>(oracle), new HashSet<String>(foundMethods));
 	}
 
